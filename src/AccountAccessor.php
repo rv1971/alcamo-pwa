@@ -12,16 +12,8 @@ class AccountAccessor extends AbstractTableAccessor
         "INSERT INTO %s(username, created, modified)\n"
         . "  VALUES(?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
 
-    private $addStmt_; ///< Statement
-
     public function add($username): void
     {
-        if (!isset($this->addStmt_)) {
-            $this->addStmt_ = $this->prepare(
-                sprintf(static::ADD_STMT, $this->tableName_)
-            );
-        }
-
-        $this->addStmt_->execute([ $username ]);
+        $this->getAddStmt()->execute([ $username ]);
     }
 }
