@@ -8,7 +8,7 @@ class AccountAccessor extends AbstractTableAccessor
 
     public const TABLE_NAME = 'account';
 
-    const ADD_STMT =
+    public const ADD_STMT =
         "INSERT INTO %s(username, created, modified)\n"
         . "  VALUES(?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
 
