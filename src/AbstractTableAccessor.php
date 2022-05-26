@@ -12,11 +12,11 @@ abstract class AbstractTableAccessor extends TableAccessorBase
     private $addStmt_;    ///< Statement
     private $removeStmt_; ///< Statement
 
-    public static function newFromDbParams(iterable $params)
+    public static function newFromParams(iterable $params)
     {
-        return new self(
+        return new static(
             $params['connection'],
-            $params['table-prefix']
+            $params['tablePrefix']
         );
     }
 

@@ -10,7 +10,12 @@ class AccountAccessorTest extends TestCase
 
     public function testBasics()
     {
-        $accessor = new AccountAccessor(static::DSN, 'foo_');
+        $accessor = AccountAccessor::newFromParams(
+            [
+                'connection' => static::DSN,
+                'tablePrefix' => 'foo_'
+            ]
+        );
 
         $accessor->createTable();
 
