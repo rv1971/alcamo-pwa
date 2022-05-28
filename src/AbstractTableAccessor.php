@@ -10,6 +10,7 @@ abstract class AbstractTableAccessor extends TableAccessorBase
 
     private $getStmt_;    ///< Statement
     private $addStmt_;    ///< Statement
+    private $modifyStmt_; ///< Statement
     private $removeStmt_; ///< Statement
 
     public static function newFromParams(iterable $params)
@@ -64,6 +65,17 @@ abstract class AbstractTableAccessor extends TableAccessorBase
         }
 
         return $this->addStmt_;
+    }
+
+    protected function getModifyStmt(): Statement
+    {
+        if (!isset($this->modifyStmt_)) {
+            $this->modifyStmt_ = $this->prepare(
+                sprintf(static::MODIFY_STMT, $this->tableName_)
+            );
+        }
+
+        return $this->modifyStmt_;
     }
 
     protected function getRemoveStmt(): Statement

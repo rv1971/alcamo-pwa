@@ -54,7 +54,7 @@ class OpenInstAccessor extends AbstractTableAccessor
      *
      * Remove any expired records.
      */
-    public function get(string $obfuscated, string $username): ?OpenInstRecord
+    public function get(string $username, string $obfuscated): ?OpenInstRecord
     {
         foreach (
             $this->getGetStmt()->executeAndReturnSelf([ $username ]) as $record

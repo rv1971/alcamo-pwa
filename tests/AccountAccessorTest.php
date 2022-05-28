@@ -8,24 +8,29 @@ class AccountAccessorTest extends TestCase
 {
     public const DSN = 'sqlite::memory:';
 
-    public function testBasics()
+    private $accessor_;
+
+    public function setUp(): void
     {
-        $accessor = AccountAccessor::newFromParams(
+        $this->accessor_ = AccountAccessor::newFromParams(
             [
                 'connection' => static::DSN,
                 'tablePrefix' => 'foo_'
             ]
         );
 
-        $accessor->createTable();
+        $this->accessor_->createTable();
+    }
 
-        $accessor->add('alice');
+    public function testAdd()
+    {
+        $this->accessor_->add('alice');
 
-        $accessor->add('bob');
+        $this->accessor_->add('bob');
 
         $accounts = [];
 
-        foreach ($accessor as $record) {
+        foreach ($this->accessor_ as $record) {
             $accounts[$record->getUsername()] = [
                 $record->getCreated(),
                 $record->getModified(),
