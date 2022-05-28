@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\exception\DataNotFound;
 use PHPUnit\Framework\TestCase;
 
 class OpenInstAccessorTest extends TestCase
@@ -64,6 +65,10 @@ class OpenInstAccessorTest extends TestCase
         // alice 1 is expired now
         $this->assertNull($accessor->get($alice1Obfuscated, 'alice'));
 
+        // unlike the previous invocation, this tests the case that no
+        // record is found in the table
+        $this->assertNull($accessor->get($alice1Obfuscated, 'alice'));
+
         // alice 2 is still there
         $this->assertInstanceOf(
             OpenInstRecord::class,
@@ -74,5 +79,13 @@ class OpenInstAccessorTest extends TestCase
 
         // now alice 2 is expired as well
         $this->assertNull($accessor->get($alice2Obfuscated, 'alice'));
+
+        $this->expectException(DataNotFound::class);
+
+        $this->expectExceptionMessage(
+            'Data not found in table "foo_open_inst" for key'
+        );
+
+        $accessor->remove($alice1->getPasswdHash());
     }
 }

@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
 class OpenInstAccessor extends AbstractTableAccessor
@@ -72,15 +73,15 @@ class OpenInstAccessor extends AbstractTableAccessor
                     $record = null;
                 }
 
-                break;
+                return $record;
             }
         }
 
-        return $record;
+        return null;
     }
 
     /// @return obfuscated password
-    public function add($username): string
+    public function add(string $username): string
     {
         $passwd = $this->passwdTransformer_->createPasswd();
 
@@ -93,6 +94,17 @@ class OpenInstAccessor extends AbstractTableAccessor
 
     public function remove($passwdHash): void
     {
-        $this->getRemoveStmt()->execute([ $passwdHash ]);
+        $stmt = $this->getRemoveStmt();
+
+        $stmt->execute([ $passwdHash ]);
+
+        if (!$stmt->rowCount()) {
+            throw (new DataNotFound())->setMessageContext(
+                [
+                    'inTable' => $this->tableName_,
+                    'forKey' => $passwdHash
+                ]
+            );
+        }
     }
 }
