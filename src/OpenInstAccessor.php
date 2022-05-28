@@ -10,8 +10,7 @@ class OpenInstAccessor extends AbstractTableAccessor
 
     public const TABLE_NAME = 'open_inst';
 
-    public const GET_STMT =
-        "SELECT * FROM %s WHERE username = ? ORDER BY created, passwd_hash";
+    public const GET_STMT = "SELECT * FROM %s WHERE username = ?";
 
     public const ADD_STMT =
         "INSERT INTO %s(passwd_hash, username, created)\n"
@@ -50,47 +49,43 @@ class OpenInstAccessor extends AbstractTableAccessor
     }
 
     /**
-     * @brief Get oldest record for this user, if any
+     * @brief Get record, if present and not expired
      *
      * Remove any expired records.
      */
-    public function get(string $username): ?OpenInstRecord
+    public function get(string $obfuscated, string $username): ?OpenInstRecord
     {
-        for (;;) {
-            $record = $this->getGetStmt()
-                ->executeAndReturnSelf([ $username ])
-                ->fetch();
-
-            if (!$record) {
-                return null;
-            }
-
+        foreach (
+            $this->getGetStmt()->executeAndReturnSelf([ $username ]) as $record
+        ) {
             if (
-                $record->getCreated()
-                    ->add($this->maxAge_)
-                    ->getTimestamp()
-                > (new \DateTimeImmutable())->getTimestamp()
+                $this->passwdTransformer_->verifyObfuscatedPasswd(
+                    $obfuscated,
+                    $record->getPasswdHash()
+                )
             ) {
-                return $record;
-            }
+                if (
+                    $record->getCreated()->add($this->maxAge_)->getTimestamp()
+                    < (new \DateTimeImmutable())->getTimestamp()
+                ) {
+                    $this->remove($record->getPasswdHash());
+                    $record = null;
+                }
 
-            $this->remove($record->getPasswdHash());
+                break;
+            }
         }
+
+        return $record;
     }
 
     /// @return obfuscated password
     public function add($username): string
     {
-        if (!isset($this->addStmt_)) {
-            $this->addStmt_ = $this->prepare(
-                sprintf(static::ADD_STMT, $this->tableName_)
-            );
-        }
-
         $passwd = $this->passwdTransformer_->createPasswd();
 
-        $this->addStmt_->execute(
-            [ $this->passwdTransformer_->getHash($passwd), $username ]
+        $this->getAddStmt()->execute(
+            [ $this->passwdTransformer_->createHash($passwd), $username ]
         );
 
         return $this->passwdTransformer_->obfuscatePasswd($passwd);

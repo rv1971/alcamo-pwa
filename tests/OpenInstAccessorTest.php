@@ -23,7 +23,13 @@ class OpenInstAccessorTest extends TestCase
 
         $alice1Obfuscated = $accessor->add('alice');
 
-        $alice1 = $accessor->get('alice');
+        sleep(2);
+
+        $alice2Obfuscated = $accessor->add('alice');
+
+        $alice2 = $accessor->get($alice2Obfuscated, 'alice');
+
+        $alice1 = $accessor->get($alice1Obfuscated, 'alice');
 
         $this->assertTrue(
             $accessor->getPasswdTransformer()->verifyObfuscatedPasswd(
@@ -32,32 +38,41 @@ class OpenInstAccessorTest extends TestCase
             )
         );
 
-        sleep(1);
-
-        $alice2Obfuscated = $accessor->add('alice');
-
-        // still gets the first record
-        $alice1a = $accessor->get('alice');
-
-        $this->assertEquals($alice1, $alice1a);
-
-        $this->assertFalse(
-            $accessor->getPasswdTransformer()->verifyObfuscatedPasswd(
-                $alice2Obfuscated,
-                $alice1a->getPasswdHash()
-            )
-        );
-
-        sleep(3);
-
-        // now the first alice is expired, and get() returns the second one
-        $alice2 = $accessor->get('alice');
-
         $this->assertTrue(
             $accessor->getPasswdTransformer()->verifyObfuscatedPasswd(
                 $alice2Obfuscated,
                 $alice2->getPasswdHash()
             )
         );
+
+        $this->assertFalse(
+            $accessor->getPasswdTransformer()->verifyObfuscatedPasswd(
+                $alice2Obfuscated,
+                $alice1->getPasswdHash()
+            )
+        );
+
+        $this->assertFalse(
+            $accessor->getPasswdTransformer()->verifyObfuscatedPasswd(
+                $alice1Obfuscated,
+                $alice2->getPasswdHash()
+            )
+        );
+
+        sleep(3);
+
+        // alice 1 is expired now
+        $this->assertNull($accessor->get($alice1Obfuscated, 'alice'));
+
+        // alice 2 is still there
+        $this->assertInstanceOf(
+            OpenInstRecord::class,
+            $accessor->get($alice2Obfuscated, 'alice')
+        );
+
+        sleep(2);
+
+        // now alice 2 is expired as well
+        $this->assertNull($accessor->get($alice2Obfuscated, 'alice'));
     }
 }

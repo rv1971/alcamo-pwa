@@ -37,9 +37,9 @@ class PasswdTransformer
         return $this->obfuscatePasswd($passwd);
     }
 
-    public function getHash(string $obfuscated): string
+    public function createHash(string $passwd): string
     {
-        return password_hash($obfuscated, PASSWORD_DEFAULT);
+        return password_hash($passwd, PASSWORD_DEFAULT);
     }
 
     public function verifyObfuscatedPasswd(
