@@ -18,7 +18,7 @@ class PasswdTransformer
         return random_bytes(static::PASSWD_LENGTH);
     }
 
-    public function obfuscatePasswd(string $passwd): string
+    public function obfuscate(string $passwd): string
     {
         $passwdLen = strlen($passwd);
         $passwdKeyLen = strlen($this->passwdKey_);
@@ -32,9 +32,9 @@ class PasswdTransformer
         return $result;
     }
 
-    public function unobfuscatePasswd(string $passwd): string
+    public function unobfuscate(string $passwd): string
     {
-        return $this->obfuscatePasswd($passwd);
+        return $this->obfuscate($passwd);
     }
 
     public function createHash(string $passwd): string
@@ -46,9 +46,6 @@ class PasswdTransformer
         string $obfuscated,
         string $passwdHash
     ): bool {
-        return password_verify(
-            $this->unobfuscatePasswd($obfuscated),
-            $passwdHash
-        );
+        return password_verify($this->unobfuscate($obfuscated), $passwdHash);
     }
 }

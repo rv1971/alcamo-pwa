@@ -24,7 +24,7 @@ class PasswdTransformerTest extends TestCase
 
         $this->assertTrue($passwd2 != $passwd);
 
-        $obfuscated = $transformer->obfuscatePasswd($passwd);
+        $obfuscated = $transformer->obfuscate($passwd);
 
         $this->assertSame(
             PasswdTransformer::PASSWD_LENGTH,
@@ -33,14 +33,14 @@ class PasswdTransformerTest extends TestCase
 
         $this->assertSame(
             $passwd,
-            $transformer->unobfuscatePasswd($obfuscated)
+            $transformer->unobfuscate($obfuscated)
         );
 
         $this->assertTrue($obfuscated != $passwd);
 
         $this->assertSame(
             $passwd,
-            $transformer->unobfuscatePasswd($obfuscated)
+            $transformer->unobfuscate($obfuscated)
         );
 
         $hash = $transformer->createHash($passwd);
@@ -61,7 +61,7 @@ class PasswdTransformerTest extends TestCase
 
         $this->assertTrue(
             $transformer->verifyObfuscatedPasswd(
-                $transformer->obfuscatePasswd($passwd2),
+                $transformer->obfuscate($passwd2),
                 $hash2
             )
         );

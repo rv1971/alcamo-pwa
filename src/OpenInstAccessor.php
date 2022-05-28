@@ -89,7 +89,7 @@ class OpenInstAccessor extends AbstractTableAccessor
             [ $this->passwdTransformer_->createHash($passwd), $username ]
         );
 
-        return $this->passwdTransformer_->obfuscatePasswd($passwd);
+        return $this->passwdTransformer_->obfuscate($passwd);
     }
 
     public function remove($passwdHash): void
