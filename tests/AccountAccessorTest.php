@@ -28,6 +28,13 @@ class AccountAccessorTest extends TestCase
 
         $this->accessor_->add('bob');
 
+        $this->assertSame(
+            'alice',
+            $this->accessor_->get('alice')->getUsername()
+        );
+
+        $this->assertNull($this->accessor_->get('ALICE'));
+
         $accounts = [];
 
         foreach ($this->accessor_ as $record) {
