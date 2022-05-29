@@ -12,6 +12,24 @@ class InstAccessorTest extends TestCase
 
     private $accessor_;
 
+    private $testData_ = [
+        [
+            'username' => 'bob',
+            'userAgent' => 'BlackBerry9900/5.1.0.692',
+            'appVersion' => '0.42.1'
+        ],
+        [
+            'username' => 'alice',
+            'userAgent' => 'Mozilla/5.0',
+            'appVersion' => '1.2.3'
+        ],
+        [
+            'username' => 'bob',
+            'userAgent' => 'BlackBerry9800/5.0.0.690',
+            'appVersion' => '0.43.0'
+        ]
+    ];
+
     public function setUp(): void
     {
         $this->accessor_ = InstAccessor::newFromParams(
@@ -23,145 +41,150 @@ class InstAccessorTest extends TestCase
         );
 
         $this->accessor_->createTable();
+
+        foreach ($this->testData_ as $i => $data) {
+            $data = (object)$data;
+
+            $data->instId = Uuid::uuid_create();
+
+            $data->passwd = $this->accessor_->getPasswdTransformer()
+                ->createPasswd();
+
+            $data->obfuscated = $this->accessor_->getPasswdTransformer()
+                ->obfuscate($data->passwd);
+
+            $data->passwdHash = $this->accessor_->getPasswdTransformer()
+                ->createHash($data->passwd);
+
+            $this->accessor_->add(
+                $data->instId,
+                $data->username,
+                $data->passwdHash,
+                $data->userAgent,
+                $data->appVersion
+            );
+
+            $this->testData_[$i] = $data;
+        }
     }
 
-    public function testBasics()
+    public function testGet()
     {
-        $instId1 = Uuid::uuid_create();
+        foreach ($this->testData_ as $data) {
+            $record = $this->accessor_->get($data->instId);
 
-        $username1 = 'bob';
+            $this->assertSame(
+                $data->instId, $record->getInstId()
+            );
 
-        $passwd1 = $this->accessor_->getPasswdTransformer()->createPasswd();
+            $this->assertSame(
+                $data->username, $record->getUsername()
+            );
 
-        $obfuscated1 =
-            $this->accessor_->getPasswdTransformer()->obfuscate($passwd1);
+            $this->assertSame(
+                $data->passwdHash, $record->getPasswdHash()
+            );
 
-        $passwdHash1 =
-            $this->accessor_->getPasswdTransformer()->createHash($passwd1);
+            $this->assertSame(
+                $data->userAgent, $record->getUserAgent()
+            );
 
-        $userAgent1 = 'BlackBerry9900/5.1.0.692';
+            $this->assertSame(
+                $data->appVersion, $record->getAppVersion()
+            );
 
-        $appVersion1 = '0.42.1';
-
-        $this->accessor_->add(
-            $instId1,
-            $username1,
-            $passwdHash1,
-            $userAgent1,
-            $appVersion1
-        );
-
-        $instId2 = Uuid::uuid_create();
-
-        $username2 = 'charles';
-
-        $passwd2 = $this->accessor_->getPasswdTransformer()->createPasswd();
-
-        $obfuscated2 =
-            $this->accessor_->getPasswdTransformer()->obfuscate($passwd2);
-
-        $passwdHash2 =
-            $this->accessor_->getPasswdTransformer()->createHash($passwd2);
-
-        $userAgent2 = 'Mozilla/5.0';
-
-        $appVersion2 = '0.1.2';
-
-        $this->accessor_->add(
-            $instId2,
-            $username2,
-            $passwdHash2,
-            $userAgent2,
-            $appVersion2
-        );
-
-        $instId3 = Uuid::uuid_create();
-
-        $this->accessor_->add(
-            $instId3,
-            $username2,
-            $passwdHash2,
-            $userAgent2,
-            $appVersion2
-        );
-
-        $user2Insts = [];
-
-        foreach ($this->accessor_->getUserInsts($username2) as $record) {
-            $user2Insts[$record->getInstId()] = $record;
+            $this->assertSame(
+                0, $record->getUpdateCount()
+            );
         }
 
-        $expectedInsts = [ $instId2, $instId3 ];
+        $this->assertNull($this->accessor_->get('foo'));
+    }
+
+    public function testGetWithPasswd()
+    {
+        $this->assertSame(
+            $this->testData_[1]->instId,
+            $this->accessor_
+                ->get(
+                    $this->testData_[1]->instId,
+                    $this->testData_[1]->username,
+                    $this->testData_[1]->obfuscated
+                )
+                ->getInstId()
+        );
+    }
+
+    public function testGetException1()
+    {
+        $this->expectException(DataNotFound::class);
+
+        $this->expectExceptionMessage(
+            'Data not found in table "bar_inst" for key ["'
+        );
+
+        $this->accessor_->get($this->testData_[1]->instId, 'ALICE');
+    }
+
+    public function testGetException2()
+    {
+        $this->expectException(DataNotFound::class);
+
+        $this->expectExceptionMessage(
+            'Data not found in table "bar_inst" for key ["'
+        );
+
+        $this->accessor_->get($this->testData_[1]->instId, 'alice', 'qux');
+    }
+
+    public function testGetUserInsts()
+    {
+        $insts = [];
+
+        foreach ($this->accessor_->getUserInsts('bob') as $record) {
+            $insts[$record->getInstId()] = $record;
+        }
+
+        $expectedInsts = [
+            $this->testData_[0]->instId,
+            $this->testData_[2]->instId,
+        ];
 
         sort($expectedInsts);
 
-        $this->assertSame($expectedInsts, array_keys($user2Insts));
+        $this->assertSame($expectedInsts, array_keys($insts));
+    }
 
-        $this->assertNull(
-            $this->accessor_->get(
-                Uuid::uuid_create(),
-                $username1,
-                $obfuscated1
-            )
+    public function testModify()
+    {
+        $userAgent = 'BlackBerry9800/5.0.0.691';
+
+        $appVersion = '0.43.2';
+
+        $this->accessor_->modify(
+            $this->testData_[2]->instId,
+            $userAgent,
+            $appVersion
         );
 
-        $this->assertNull(
-            $this->accessor_->get($instId1, $username2, $obfuscated1)
-        );
+        $inst = $this->accessor_->get($this->testData_[2]->instId);
+
+        $this->assertSame(1, $inst->getUpdateCount());
+
+        $this->assertSame($userAgent, $inst->getUserAgent());
+
+        $this->assertSame($appVersion, $inst->getAppVersion());
+    }
+
+    public function testRemove()
+    {
+        $this->accessor_->remove($this->testData_[0]->instId);
 
         $this->assertNull(
-            $this->accessor_->get($instId1, $username1, $obfuscated2)
+            $this->accessor_->get($this->testData_[0]->instId)
         );
 
-        $inst1 = $this->accessor_->get($instId1, $username1, $obfuscated1);
-
-        $this->assertSame($instId1, $inst1->getInstId());
-
-        $this->assertSame(substr($instId1, 0, 6), $inst1->getShortInstId());
-
-        $this->assertSame($username1, $inst1->getUsername());
-
-        $this->assertSame($passwdHash1, $inst1->getPasswdHash());
-
-        $this->assertSame($userAgent1, $inst1->getUserAgent());
-
-        $this->assertSame($appVersion1, $inst1->getAppVersion());
-
-        $this->assertSame(0, $inst1->getUpdateCount());
-
-        $inst2 = $this->accessor_->get($instId2, $username2, $obfuscated2);
-
-        $this->assertSame($instId2, $inst2->getInstId());
-
-        $this->assertSame(substr($instId2, 0, 6), $inst2->getShortInstId());
-
-        $this->assertSame($username2, $inst2->getUsername());
-
-        $this->assertSame($passwdHash2, $inst2->getPasswdHash());
-
-        $this->assertSame($userAgent2, $inst2->getUserAgent());
-
-        $this->assertSame($appVersion2, $inst2->getAppVersion());
-
-        $userAgent3 = 'BlackBerry9800/5.0.0.690';
-
-        $appVersion3 = '0.43.0';
-
-        $this->accessor_->modify($instId1, $userAgent3, $appVersion3);
-
-        $inst1 = $this->accessor_->get($instId1, $username1, $obfuscated1);
-
-        $this->assertSame(1, $inst1->getUpdateCount());
-
-        $this->assertSame($userAgent3, $inst1->getUserAgent());
-
-        $this->assertSame($appVersion3, $inst1->getAppVersion());
-
-        $this->accessor_->remove($instId2);
-
-        $this->assertNull(
-            $this->accessor_->get($instId2, $username2, $obfuscated2)
-        );
+        $this->assertSame(2, count($this->accessor_));
     }
 
     public function testRemoveException()

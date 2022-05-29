@@ -10,8 +10,7 @@ class InstAccessor extends AbstractTableAccessor
 
     public const TABLE_NAME = 'inst';
 
-    public const GET_STMT =
-        "SELECT * FROM %s WHERE inst_id = ? AND username = ?";
+    public const GET_STMT = "SELECT * FROM %s WHERE inst_id = ?";
 
     public const GET_USER_INSTS_STMT =
         "SELECT * FROM %s WHERE username = ? order by inst_id";
@@ -70,22 +69,49 @@ EOD;
 
     public function get(
         string $instId,
-        string $username,
-        string $obfuscated
+        ?string $username = null,
+        ?string $obfuscated = null
     ): ?InstRecord {
+        // loop finds at most one record
         foreach (
             $this->getGetStmt()
-                ->executeAndReturnSelf([ $instId, $username ]) as $record
+                ->executeAndReturnSelf([ $instId ]) as $record
         ) {
-            return
-                $this->passwdTransformer_->verifyObfuscatedPasswd(
-                    $obfuscated,
-                    $record->getPasswdHash()
-                )
-                ? $record
-                : null;
+            /** Verify user and password if username is given. */
+            if (isset($username)) {
+                if ($record->getUsername() != $username) {
+                    /** @throw alcamo::exception::DataNotFound if $username is
+                     *  given but does not match */
+                    throw (new DataNotFound())->setMessageContext(
+                        [
+                            'inTable' => $this->tableName_,
+                            'forKey' => [ $instId, $username ]
+                        ]
+                    );
+                }
+
+                if (
+                    !$this->passwdTransformer_->verifyObfuscatedPasswd(
+                        $obfuscated,
+                        $record->getPasswdHash()
+                    )
+                ) {
+                    /** @throw alcamo::exception::DataNotFound if $username is
+                     *  given but password does not match */
+                    throw (new DataNotFound())->setMessageContext(
+                        [
+                            'inTable' => $this->tableName_,
+                            'forKey' => [ $instId, $username, $obfuscated ]
+                        ]
+                    );
+                }
+            }
+
+            return $record;
         };
 
+        /** If no username is given and no record is found, return `null`
+         *  without throwing. */
         return null;
     }
 

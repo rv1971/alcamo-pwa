@@ -99,6 +99,8 @@ class OpenInstAccessor extends AbstractTableAccessor
         $stmt->execute([ $passwdHash ]);
 
         if (!$stmt->rowCount()) {
+            /** @throw alcamo::exception::DataNotFound if $passwdHash does not
+             *  exist */
             throw (new DataNotFound())->setMessageContext(
                 [
                     'inTable' => $this->tableName_,
