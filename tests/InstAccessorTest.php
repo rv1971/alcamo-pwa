@@ -17,7 +17,7 @@ class InstAccessorTest extends TestCase
         $this->accessor_ = InstAccessor::newFromParams(
             [
                 'connection' => static::DSN,
-                'tablePrefix' => 'foo_',
+                'tablePrefix' => 'bar_',
                 'passwdKey' => random_bytes(8)
             ]
         );
@@ -134,5 +134,22 @@ class InstAccessorTest extends TestCase
         $this->assertSame($userAgent3, $inst1->getUserAgent());
 
         $this->assertSame($appVersion3, $inst1->getAppVersion());
+
+        $this->accessor_->remove($instId2);
+
+        $this->assertNull(
+            $this->accessor_->get($instId2, $username2, $obfuscated2)
+        );
+    }
+
+    public function testRemoveException()
+    {
+        $this->expectException(DataNotFound::class);
+
+        $this->expectExceptionMessage(
+            'Data not found in table "bar_inst" for key "baz"'
+        );
+
+        $this->accessor_->remove('baz');
     }
 }

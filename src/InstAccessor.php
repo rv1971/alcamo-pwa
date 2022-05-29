@@ -37,6 +37,8 @@ UPDATE %s SET
 WHERE inst_id = ?
 EOD;
 
+    public const REMOVE_STMT = "DELETE FROM %s WHERE inst_id = ?";
+
     private $passwdTransformer_; ///< PasswdTransformer
 
     public static function newFromParams(iterable $params)
@@ -116,6 +118,22 @@ EOD;
                 [
                     'inTable' => $this->tableName_,
                     'forKey' => $passwdHash
+                ]
+            );
+        }
+    }
+
+    public function remove($instId): void
+    {
+        $stmt = $this->getRemoveStmt();
+
+        $stmt->execute([ $instId ]);
+
+        if (!$stmt->rowCount()) {
+            throw (new DataNotFound())->setMessageContext(
+                [
+                    'inTable' => $this->tableName_,
+                    'forKey' => $instId
                 ]
             );
         }
