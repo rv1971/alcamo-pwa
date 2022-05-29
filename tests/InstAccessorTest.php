@@ -75,6 +75,28 @@ class InstAccessorTest extends TestCase
             $appVersion2
         );
 
+        $instId3 = Uuid::uuid_create();
+
+        $this->accessor_->add(
+            $instId3,
+            $username2,
+            $passwdHash2,
+            $userAgent2,
+            $appVersion2
+        );
+
+        $user2Insts = [];
+
+        foreach ($this->accessor_->getUserInsts($username2) as $record) {
+            $user2Insts[$record->getInstId()] = $record;
+        }
+
+        $expectedInsts = [ $instId2, $instId3 ];
+
+        sort($expectedInsts);
+
+        $this->assertSame($expectedInsts, array_keys($user2Insts));
+
         $this->assertNull(
             $this->accessor_->get(
                 Uuid::uuid_create(),

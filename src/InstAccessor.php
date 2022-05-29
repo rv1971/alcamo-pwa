@@ -13,6 +13,9 @@ class InstAccessor extends AbstractTableAccessor
     public const GET_STMT =
         "SELECT * FROM %s WHERE inst_id = ? AND username = ?";
 
+    public const GET_USER_INSTS_STMT =
+        "SELECT * FROM %s WHERE username = ? order by inst_id";
+
     public const ADD_STMT = <<<EOD
 INSERT INTO %s(
     inst_id,
@@ -84,6 +87,13 @@ EOD;
         };
 
         return null;
+    }
+
+    public function getUserInsts(string $username): \Traversable {
+        return $this->query(
+            sprintf(static::GET_USER_INSTS_STMT, $this->tableName_),
+            [ $username ]
+        );
     }
 
     public function add(
