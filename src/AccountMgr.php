@@ -90,6 +90,19 @@ class AccountMgr
         );
     }
 
+    public function removeInst(string $instId) {
+        $username = $this->instAccessor_->get($instId)->getUsername();
+
+        $this->instAccessor_->remove($instId);
+
+        foreach ($this->instAccessor_->getUserInsts($username) as $inst) {
+            return;
+        }
+
+        // remove user if no installations left
+        $this->accountAccessor_->remove($username);
+    }
+
     public function createTables(): void
     {
         $this->accountAccessor_->createTable();

@@ -10,9 +10,7 @@ class InstAccessorTest extends TestCase
 {
     public const DSN = 'sqlite::memory:';
 
-    private $accessor_;
-
-    private $testData_ = [
+    public const TEST_DATA = [
         [
             'username' => 'bob',
             'userAgent' => 'BlackBerry9900/5.1.0.692',
@@ -30,6 +28,10 @@ class InstAccessorTest extends TestCase
         ]
     ];
 
+    private $accessor_;
+
+    private $testData_;
+
     public function setUp(): void
     {
         $this->accessor_ = InstAccessor::newFromParams(
@@ -42,7 +44,7 @@ class InstAccessorTest extends TestCase
 
         $this->accessor_->createTable();
 
-        foreach ($this->testData_ as $i => $data) {
+        foreach (static::TEST_DATA as $i => $data) {
             $data = (object)$data;
 
             $data->instId = Uuid::uuid_create();
