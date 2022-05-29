@@ -14,8 +14,7 @@ class AccountAccessorTest extends TestCase
     {
         $this->accessor_ = AccountAccessor::newFromParams(
             [
-                'connection' => static::DSN,
-                'tablePrefix' => 'foo_'
+                'connection' => static::DSN
             ]
         );
 

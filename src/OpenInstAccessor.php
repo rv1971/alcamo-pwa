@@ -26,7 +26,7 @@ class OpenInstAccessor extends AbstractTableAccessor
     {
         return new static(
             $params['connection'],
-            $params['tablePrefix'],
+            $params['tablePrefix'] ?? null,
             new PasswdTransformer($params['passwdKey']),
             new Duration($params['maxOpenInstAge'])
         );

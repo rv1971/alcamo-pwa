@@ -17,7 +17,7 @@ abstract class AbstractTableAccessor extends TableAccessorBase
     {
         return new static(
             $params['connection'],
-            $params['tablePrefix']
+            $params['tablePrefix'] ?? null
         );
     }
 
