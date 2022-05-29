@@ -34,18 +34,30 @@ class InstAccessorTest extends TestCase
 
     public function setUp(): void
     {
-        $this->accessor_ = InstAccessor::newFromParams(
-            [
-                'connection' => static::DSN,
-                'tablePrefix' => 'bar_',
-                'passwdKey' => random_bytes(8)
-            ]
-        );
+        $pdo = new \PDO(static::DSN);
+
+        $params = [
+            'connection' => $pdo,
+            'tablePrefix' => 'bar_',
+            'passwdKey' => random_bytes(8)
+        ];
+
+        $pdo->query('PRAGMA foreign_keys = ON');
+
+        $this->accessor_ = InstAccessor::newFromParams($params);
+
+        $accountAccessor_ = AccountAccessor::newFromParams($params);
+
+        $accountAccessor_->createTable();
 
         $this->accessor_->createTable();
 
         foreach (static::TEST_DATA as $i => $data) {
             $data = (object)$data;
+
+            if (!$accountAccessor_->get($data->username)) {
+                $accountAccessor_->add($data->username);
+            }
 
             $data->instId = Uuid::uuid_create();
 
@@ -75,29 +87,17 @@ class InstAccessorTest extends TestCase
         foreach ($this->testData_ as $data) {
             $record = $this->accessor_->get($data->instId);
 
-            $this->assertSame(
-                $data->instId, $record->getInstId()
-            );
+            $this->assertSame($data->instId, $record->getInstId());
 
-            $this->assertSame(
-                $data->username, $record->getUsername()
-            );
+            $this->assertSame($data->username, $record->getUsername());
 
-            $this->assertSame(
-                $data->passwdHash, $record->getPasswdHash()
-            );
+            $this->assertSame($data->passwdHash, $record->getPasswdHash());
 
-            $this->assertSame(
-                $data->userAgent, $record->getUserAgent()
-            );
+            $this->assertSame($data->userAgent, $record->getUserAgent());
 
-            $this->assertSame(
-                $data->appVersion, $record->getAppVersion()
-            );
+            $this->assertSame($data->appVersion, $record->getAppVersion());
 
-            $this->assertSame(
-                0, $record->getUpdateCount()
-            );
+            $this->assertSame(0, $record->getUpdateCount());
         }
 
         $this->assertNull($this->accessor_->get('foo'));

@@ -7,5 +7,7 @@ create table /*_*/inst(
   update_count integer not null,
   created timestamp not null,
   modified timestamp not null,
-  primary key (inst_id)
+  constraint /*_*/inst_pk primary key (inst_id),
+  constraint /*_*/inst_account_fk foreign key (username)
+    references /*_*/account
 );

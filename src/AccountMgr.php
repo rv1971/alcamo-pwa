@@ -90,7 +90,8 @@ class AccountMgr
         );
     }
 
-    public function removeInst(string $instId) {
+    public function removeInst(string $instId)
+    {
         $username = $this->instAccessor_->get($instId)->getUsername();
 
         $this->instAccessor_->remove($instId);

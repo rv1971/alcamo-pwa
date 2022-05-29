@@ -13,14 +13,24 @@ class OpenInstAccessorTest extends TestCase
 
     public function setUp(): void
     {
-        $this->accessor_ = OpenInstAccessor::newFromParams(
-            [
-                'connection' => static::DSN,
-                'tablePrefix' => 'foo_',
-                'passwdKey' => random_bytes(8),
-                'maxOpenInstAge' => 'PT4S'
-            ]
-        );
+        $pdo = new \PDO(static::DSN);
+
+        $params = [
+            'connection' => $pdo,
+            'tablePrefix' => 'foo_',
+            'passwdKey' => random_bytes(8),
+            'maxOpenInstAge' => 'PT4S'
+        ];
+
+        $pdo->query('PRAGMA foreign_keys = ON');
+
+        $this->accessor_ = OpenInstAccessor::newFromParams($params);
+
+        $accountAccessor_ = AccountAccessor::newFromParams($params);
+
+        $accountAccessor_->createTable();
+
+        $accountAccessor_->add('alice');
 
         $this->accessor_->createTable();
     }

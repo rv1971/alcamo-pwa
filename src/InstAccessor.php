@@ -115,7 +115,8 @@ EOD;
         return null;
     }
 
-    public function getUserInsts(string $username): \Traversable {
+    public function getUserInsts(string $username): \Traversable
+    {
         return $this->query(
             sprintf(static::GET_USER_INSTS_STMT, $this->tableName_),
             [ $username ]
