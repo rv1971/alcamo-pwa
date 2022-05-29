@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\exception\DataNotFound;
 use PHPUnit\Framework\TestCase;
 
 class AccountAccessorTest extends TestCase
@@ -13,9 +14,7 @@ class AccountAccessorTest extends TestCase
     public function setUp(): void
     {
         $this->accessor_ = AccountAccessor::newFromParams(
-            [
-                'connection' => static::DSN
-            ]
+            [ 'connection' => static::DSN ]
         );
 
         $this->accessor_->createTable();
@@ -67,5 +66,22 @@ class AccountAccessorTest extends TestCase
             (new \DateTime())->add(new \DateInterval('PT5S'))->getTimestamp(),
             $accounts['alice'][1]->getTimestamp()
         );
+
+        $this->accessor_->remove('bob');
+
+        $this->assertNull($this->accessor_->get('bob'));
+
+        $this->assertSame(1, count($this->accessor_));
+    }
+
+    public function testRemoveException()
+    {
+        $this->expectException(DataNotFound::class);
+
+        $this->expectExceptionMessage(
+            'Data not found in table "account" for key "qux"'
+        );
+
+        $this->accessor_->remove('qux');
     }
 }
