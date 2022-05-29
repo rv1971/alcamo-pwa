@@ -41,6 +41,8 @@ class AccountAccessor extends AbstractTableAccessor
         $stmt->execute([ $username ]);
 
         if (!$stmt->rowCount()) {
+            /** @throw alcamo::exception::DataNotFound if $username does not
+             *  exist */
             throw (new DataNotFound())->setMessageContext(
                 [
                     'inTable' => $this->tableName_,

@@ -66,6 +66,15 @@ class AccountAccessorTest extends TestCase
             (new \DateTime())->add(new \DateInterval('PT5S'))->getTimestamp(),
             $accounts['alice'][1]->getTimestamp()
         );
+    }
+
+    public function testRemove()
+    {
+        $this->accessor_->add('alice');
+
+        $this->accessor_->add('bob');
+
+        $this->assertSame(2, count($this->accessor_));
 
         $this->accessor_->remove('bob');
 
