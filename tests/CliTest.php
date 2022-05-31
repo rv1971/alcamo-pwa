@@ -4,7 +4,7 @@ namespace alcamo\pwa;
 
 use PHPUnit\Framework\TestCase;
 
-class SetupCliTest extends TestCase
+class CliTest extends TestCase
 {
     public const DSN = 'sqlite::memory:';
 
@@ -12,7 +12,7 @@ class SetupCliTest extends TestCase
 
     public function setUp(): void
     {
-        $this->cli_ = new SetupCli(
+        $this->cli_ = new Cli(
             [
                 'connection' => static::DSN,
                 'passwdKey' => random_bytes(8),
@@ -23,7 +23,7 @@ class SetupCliTest extends TestCase
 
     public function testSetupDatabase(): void
     {
-        $this->cli_->process('database');
+        $this->cli_->process('setup-database');
 
         $this->assertSame(
             0,

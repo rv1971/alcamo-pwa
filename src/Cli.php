@@ -2,10 +2,10 @@
 
 namespace alcamo\pwa;
 
-class SetupCli extends AbstractCli
+class Cli extends AbstractCli
 {
     public const COMMANDS = [
-        'database' => [
+        'setup-database' => [
             'setupDatabase',
             [],
             [],
