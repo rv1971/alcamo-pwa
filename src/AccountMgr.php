@@ -10,7 +10,7 @@ class AccountMgr
     private $openInstAccessor_; ///< OpenInstAccessor;
     private $instAccessor_;     ///< InstAccessor;
 
-    public static function newFromParams(iterable $params)
+    public static function newFromParams(iterable $params): self
     {
         return new static(
             AccountAccessor::newFromParams($params),

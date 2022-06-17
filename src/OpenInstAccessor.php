@@ -22,8 +22,9 @@ class OpenInstAccessor extends AbstractTableAccessor
     private $passwdTransformer_; ///< PasswdTransformer
     private $maxAge_;            ///< Duration
 
-    public static function newFromParams(iterable $params)
-    {
+    public static function newFromParams(
+        iterable $params
+    ): AbstractTableAccessor {
         return new static(
             $params['connection'],
             $params['tablePrefix'] ?? null,

@@ -13,7 +13,7 @@ abstract class AbstractTableAccessor extends TableAccessorBase
     private $modifyStmt_; ///< Statement
     private $removeStmt_; ///< Statement
 
-    public static function newFromParams(iterable $params)
+    public static function newFromParams(iterable $params): self
     {
         return new static(
             $params['connection'],
