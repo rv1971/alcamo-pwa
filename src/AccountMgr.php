@@ -10,6 +10,11 @@ class AccountMgr
     private $openInstAccessor_; ///< OpenInstAccessor;
     private $instAccessor_;     ///< InstAccessor;
 
+    /**
+     * @param $params array or ArrayAccess object containing
+     * - `connection`
+     * - `?string tablePrefix`
+     */
     public static function newFromParams(iterable $params): self
     {
         return new static(

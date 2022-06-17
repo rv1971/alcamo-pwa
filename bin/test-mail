@@ -1,0 +1,43 @@
+#!/usr/bin/env php
+<?php
+
+namespace alcamo\pwa;
+
+include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
+
+use alcamo\cli\AbstractCli;
+use GetOpt\Operand;
+
+class TestMailerCli extends AbstractCli
+{
+    public const OPERANDS = [
+        'host' => Operand::REQUIRED,
+        'port' => Operand::REQUIRED,
+        'username' => Operand::REQUIRED,
+        'password' => Operand::REQUIRED,
+        'from' => Operand::REQUIRED,
+        'to' => Operand::REQUIRED
+    ];
+
+    public function process($arguments = null): int
+    {
+        parent::process($arguments);
+
+        $mailer = Mailer::newFromParams(
+            [
+                'host' => $this->getOperand(0),
+                'port' => $this->getOperand(1),
+                'username' => $this->getOperand(2),
+                'passwd' => $this->getOperand(3),
+                'from' => $this->getOperand(4),
+                'debug' => true
+            ]
+        );
+
+        $mailer->sendTestMail($this->getOperand(5));
+
+        return 0;
+    }
+}
+
+(new TestMailerCli())->process();
