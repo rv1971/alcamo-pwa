@@ -73,6 +73,11 @@ class Cli extends AbstractCli
     {
         parent::process($arguments);
 
+        if (!$this->getCommand()) {
+            $this->showHelp();
+            return 0;
+        }
+
         if ($this->getOption('json-config-file')) {
             $this->params_ = json_decode(
                 file_get_contents($this->getOption('json-config-file')),
@@ -87,11 +92,6 @@ class Cli extends AbstractCli
         }
 
         $this->mailer_ = Mailer::newFromParams($this->params_['smtp']);
-
-        if (!$this->getCommand()) {
-            $this->showHelp();
-            return 0;
-        }
 
         return $this->{$this->getCommand()->getHandler()}();
     }
