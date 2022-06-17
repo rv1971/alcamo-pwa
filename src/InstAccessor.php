@@ -10,10 +10,13 @@ class InstAccessor extends AbstractTableAccessor
 
     public const TABLE_NAME = 'inst';
 
+    public const SELECT_STMT =
+        'SELECT * FROM %s ORDER BY username, modified DESC LIMIT 100';
+
     public const GET_STMT = "SELECT * FROM %s WHERE inst_id = ?";
 
     public const GET_USER_INSTS_STMT =
-        "SELECT * FROM %s WHERE username = ? order by inst_id";
+        "SELECT * FROM %s WHERE username = ? order by modified";
 
     public const ADD_STMT = <<<EOD
 INSERT INTO %s(

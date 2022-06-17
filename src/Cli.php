@@ -36,6 +36,28 @@ class Cli extends AbstractCli
             [],
             'List accounts'
         ],
+        'list-insts' => [
+            'listInsts',
+            [
+                'app-version-detail' => [
+                    null,
+                    GetOpt::NO_ARGUMENT,
+                    'Detailed app version'
+                ],
+                'user-agent-detail' => [
+                    null,
+                    GetOpt::NO_ARGUMENT,
+                    'Detailed user agent'
+                ],
+                'username' => [
+                    'u',
+                    GetOpt::REQUIRED_ARGUMENT,
+                    'Filter for this user'
+                ]
+            ],
+            [],
+            'List installations'
+        ],
         'list-open-insts' => [
             'listOpenInsts',
             [],
@@ -64,9 +86,18 @@ class Cli extends AbstractCli
 
     public const ACCOUNT_LIST_FMT = "%-37s  %-19s  %-19s\n";
 
+    public const INST_LIST_FMT = "%-24s  %-6s %-23s  %-8s  %-10s\n";
+
+    public const INST_LIST_USER_AGENT_DETAIL_FMT = "%-24s  %-6s  %-45s\n";
+
+    public const INST_LIST_APP_VERSION_DETAIL_FMT =
+        "%-24s  %-6s  %-32s  %-10s\n";
+
     public const OPEN_INST_LIST_FMT = "%-58s  %-19s\n";
 
     public const TIMESTAMP_FMT = 'Y-m-d H:i:s';
+
+    public const DATE_FMT = 'Y-m-d';
 
     protected $params_;
     protected $accountMgr_;
@@ -145,8 +176,6 @@ class Cli extends AbstractCli
 
         printf(static::ACCOUNT_LIST_FMT, 'username', 'created', 'modified');
 
-        echo "\n";
-
         printf(
             static::ACCOUNT_LIST_FMT,
             '-------------------------------------',
@@ -170,13 +199,113 @@ class Cli extends AbstractCli
         return 0;
     }
 
+    public function listInsts(): int
+    {
+        if ($this->getOption('username')) {
+            $iterator = $this->getAccountMgr()->getInstAccessor()
+                ->getUserInsts($this->getOption('username'));
+        } else {
+            $iterator = $this->getAccountMgr()->getInstAccessor();
+        }
+
+        echo "\n";
+
+        if ($this->getOption('user-agent-detail')) {
+            printf(
+                static::INST_LIST_USER_AGENT_DETAIL_FMT,
+                'username',
+                'id',
+                'user-agent'
+            );
+
+            printf(
+                static::INST_LIST_USER_AGENT_DETAIL_FMT,
+                '------------------------',
+                '------',
+                '---------------------------------------------',
+            );
+
+            echo "\n";
+
+            foreach ($iterator as $record) {
+                printf(
+                    static::INST_LIST_USER_AGENT_DETAIL_FMT,
+                    substr($record->getUsername(), 0, 24),
+                    $record->getShortInstId(),
+                    substr($record->getUserAgent(), 0, 45)
+                );
+            }
+        } elseif ($this->getOption('app-version-detail')) {
+            printf(
+                static::INST_LIST_APP_VERSION_DETAIL_FMT,
+                'username',
+                'id',
+                'version',
+                'modified'
+            );
+
+            printf(
+                static::INST_LIST_APP_VERSION_DETAIL_FMT,
+                '------------------------',
+                '------',
+                '--------------------------------',
+                '----------'
+            );
+
+            echo "\n";
+
+            foreach ($iterator as $record) {
+                printf(
+                    static::INST_LIST_APP_VERSION_DETAIL_FMT,
+                    substr($record->getUsername(), 0, 24),
+                    $record->getShortInstId(),
+                    $record->getAppVersion(),
+                    $record->getModified()->format(static::DATE_FMT)
+                );
+            }
+        } else {
+            printf(
+                static::INST_LIST_DETAIL_FMT,
+                'username',
+                'id',
+                'user-agent',
+                'version',
+                'modified'
+            );
+
+            printf(
+                static::INST_LIST_FMT,
+                '------------------------',
+                '------',
+                '-----------------------',
+                '--------',
+                '----------',
+            );
+
+            echo "\n";
+
+            foreach ($iterator as $record) {
+                printf(
+                    static::INST_LIST_FMT,
+                    substr($record->getUsername(), 0, 24),
+                    $record->getShortInstId(),
+                    substr($record->getUserAgent(), 0, 23),
+                    substr($record->getAppVersion(), 0, 8),
+                    $record->getModified()->format(static::DATE_FMT)
+                );
+            }
+    }
+
+        echo "\n";
+
+        return 0;
+    }
+
     public function listOpenInsts(): int
     {
         echo "\n";
 
         printf(static::OPEN_INST_LIST_FMT, 'username', 'created');
-
-        echo "\n";
 
         printf(
             static::OPEN_INST_LIST_FMT,
