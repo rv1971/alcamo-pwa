@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\dao\DbAccessor;
 use PHPUnit\Framework\TestCase;
 
 class CliTest extends TestCase
@@ -59,6 +60,29 @@ class CliTest extends TestCase
             'alice@example.com',
             $cli2->getParams()['smtp']['from']
         );
+    }
+
+    public function testAddInst(): void
+    {
+        $dbAccessor = new DbAccessor(self::DSN);
+
+        $params = $this->cli_->getParams();
+        $params['db']['connection'] = $dbAccessor;
+
+        (new Cli($params))->process('setup-database');
+
+        $cli3 = new Cli($params);
+
+        $cli3->process('add alice');
+
+        foreach (
+            $cli3->getAccountMgr()->getOpenInstAccessor() as $record
+        ) {
+            $this->assertSame(
+                'alice',
+                $record->getUsername()
+            );
+        }
     }
 
     public function testSetupDatabase(): void

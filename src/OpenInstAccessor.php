@@ -11,6 +11,9 @@ class OpenInstAccessor extends AbstractTableAccessor
 
     public const TABLE_NAME = 'open_inst';
 
+    public const SELECT_STMT =
+        'SELECT * FROM %s ORDER BY username, created LIMIT 100';
+
     public const GET_STMT = "SELECT * FROM %s WHERE username = ?";
 
     public const ADD_STMT =

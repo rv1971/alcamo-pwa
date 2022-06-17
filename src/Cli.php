@@ -18,6 +18,30 @@ class Cli extends AbstractCli
         + parent::OPTIONS;
 
     public const COMMANDS = [
+        'add' => [
+            'addOpenInst',
+            [
+                'no-mail' => [
+                    null,
+                    self::NO_ARGUMENT,
+                    'Do not send a mail to the user'
+                ]
+            ],
+            [ 'username' => Operand::REQUIRED ],
+            'Add an open installation for a user'
+        ],
+        'list-accounts' => [
+            'listAccounts',
+            [],
+            [],
+            'List accounts'
+        ],
+        'list-open-insts' => [
+            'listOpenInsts',
+            [],
+            [],
+            'List open installations'
+        ],
         'setup-database' => [
             'setupDatabase',
             [],
@@ -37,6 +61,12 @@ class Cli extends AbstractCli
             'Test the SMTP server'
         ]
     ];
+
+    public const ACCOUNT_LIST_FMT = "%-37s  %-19s  %-19s\n";
+
+    public const OPEN_INST_LIST_FMT = "%-58s  %-19s\n";
+
+    public const TIMESTAMP_FMT = 'Y-m-d H:i:s';
 
     protected $params_;
     protected $accountMgr_;
@@ -94,6 +124,84 @@ class Cli extends AbstractCli
         $this->mailer_ = Mailer::newFromParams($this->params_['smtp']);
 
         return $this->{$this->getCommand()->getHandler()}();
+    }
+
+    public function addOpenInst(): int
+    {
+        $obfuscated = $this->accountMgr_->addOpenInst(
+            $this->getOperand('username')
+        );
+
+        if (!$this->getOption('no-mail')) {
+            $this->mailOpenInst($this->getOperand('username'), $obfuscated);
+        }
+
+        return 0;
+    }
+
+    public function listAccounts(): int
+    {
+        echo "\n";
+
+        printf(static::ACCOUNT_LIST_FMT, 'username', 'created', 'modified');
+
+        echo "\n";
+
+        printf(
+            static::ACCOUNT_LIST_FMT,
+            '-------------------------------------',
+            '-------------------',
+            '-------------------'
+        );
+
+        echo "\n";
+
+        foreach ($this->getAccountMgr()->getAccountAccessor() as $record) {
+            printf(
+                static::ACCOUNT_LIST_FMT,
+                substr($record->getUsername(), 0, 39),
+                $record->getCreated()->format(static::TIMESTAMP_FMT),
+                $record->getModified()->format(static::TIMESTAMP_FMT)
+            );
+        }
+
+        echo "\n";
+
+        return 0;
+    }
+
+    public function listOpenInsts(): int
+    {
+        echo "\n";
+
+        printf(static::OPEN_INST_LIST_FMT, 'username', 'created');
+
+        echo "\n";
+
+        printf(
+            static::OPEN_INST_LIST_FMT,
+            '----------------------------------------------------------',
+            '-------------------'
+        );
+
+        echo "\n";
+
+        foreach ($this->getAccountMgr()->getOpenInstAccessor() as $record) {
+            printf(
+                static::OPEN_INST_LIST_FMT,
+                substr($record->getUsername(), 0, 58),
+                $record->getCreated()->format(static::TIMESTAMP_FMT)
+            );
+        }
+
+        echo "\n";
+
+        return 0;
+    }
+
+    public function mailOpenInst(string $username, string $obfuscated): void
+    {
+        /** To be implemented in derived class. */
     }
 
     public function setupDatabase(): int
