@@ -47,6 +47,7 @@ class CliTest extends TestCase
         $cli2->process(
             '-j ' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'etc'
             . DIRECTORY_SEPARATOR . 'config_example.json'
+            . ' test-database'
         );
 
         $this->assertSame(

@@ -24,6 +24,12 @@ class Cli extends AbstractCli
             [],
             'Setup the database'
         ],
+        'test-database' => [
+            'testDatabase',
+            [],
+            [],
+            'Test whether database is accessible'
+        ],
         'test-smtp' => [
             'testSmtp',
             [],
@@ -94,6 +100,13 @@ class Cli extends AbstractCli
     {
         $this->getAccountMgr()->createTables();
 
+        return 0;
+    }
+
+    public function testDatabase(): int
+    {
+        /* Nothing extra to do since the constructor of AccountMgr called in
+         * process() fails if the database is not accessible. */
         return 0;
     }
 
