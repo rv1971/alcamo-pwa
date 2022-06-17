@@ -37,8 +37,10 @@ class InstAccessorTest extends TestCase
         $pdo = new \PDO(static::DSN);
 
         $params = [
-            'connection' => $pdo,
-            'tablePrefix' => 'bar_',
+            'db' => [
+                'connection' => $pdo,
+                'tablePrefix' => 'bar_',
+            ],
             'passwdKey' => random_bytes(8)
         ];
 

@@ -9,30 +9,10 @@ class Cli extends AbstractCli
 {
     public const OPTIONS =
         [
-            'smtp-host' => [
-                null,
+            'json-config-file' => [
+                'j',
                 GetOpt::REQUIRED_ARGUMENT,
-                'Set SMTP host'
-            ],
-            'smtp-port' => [
-                null,
-                GetOpt::REQUIRED_ARGUMENT,
-                'Set SMTP port'
-            ],
-            'smtp-username' => [
-                null,
-                GetOpt::REQUIRED_ARGUMENT,
-                'Set SMTP username'
-            ],
-            'smtp-passwd' => [
-                null,
-                GetOpt::REQUIRED_ARGUMENT,
-                'Set SMTP password'
-            ],
-            'smtp-from' => [
-                null,
-                GetOpt::REQUIRED_ARGUMENT,
-                'Set SMTP from address'
+                'Read conf from this JSON file'
             ]
         ]
         + parent::OPTIONS;
@@ -68,6 +48,11 @@ class Cli extends AbstractCli
         $this->params_ = $params;
     }
 
+    public function getParams(): array
+    {
+        return $this->params_;
+    }
+
     public function getAccountMgr(): AccountMgr
     {
         return $this->accountMgr_;
@@ -82,47 +67,24 @@ class Cli extends AbstractCli
     {
         parent::process($arguments);
 
-        if (!$this->getCommand()) {
-            $this->showHelp();
-            return 0;
+        if ($this->getOption('json-config-file')) {
+            $this->params_ = json_decode(
+                file_get_contents($this->getOption('json-config-file')),
+                true
+            );
         }
 
-        if ($this->getOption('smtp-host')) {
-            $this->params_['smtp']['host'] =
-                $this->getOption('smtp-host');
-        }
-
-        if ($this->getOption('smtp-port')) {
-            $this->params_['smtp']['port'] =
-                $this->getOption('smtp-port');
-        }
-
-        if ($this->getOption('smtp-username')) {
-            $this->params_['smtp']['username'] =
-                $this->getOption('smtp-username');
-        }
-
-        if ($this->getOption('smtp-passwd')) {
-            $this->params_['smtp']['passwd'] =
-                $this->getOption('smtp-passwd');
-        }
-
-        if ($this->getOption('smtp-from')) {
-            $this->params_['smtp']['from'] =
-                $this->getOption('smtp-from');
-        }
+        $this->accountMgr_ = AccountMgr::newFromParams($this->params_);
 
         if ($this->getOption('verbose') > 0) {
             $this->params_['smtp']['debug'] = true;
         }
 
-        if (isset($this->params_['db'])) {
-            $this->accountMgr_ =
-                AccountMgr::newFromParams($this->params_['db']);
-        }
+        $this->mailer_ = Mailer::newFromParams($this->params_['smtp']);
 
-        if (isset($this->params_['smtp'])) {
-            $this->mailer_ = Mailer::newFromParams($this->params_['smtp']);
+        if (!$this->getCommand()) {
+            $this->showHelp();
+            return 0;
         }
 
         return $this->{$this->getCommand()->getHandler()}();

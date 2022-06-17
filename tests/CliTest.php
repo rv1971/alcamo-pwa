@@ -14,12 +14,49 @@ class CliTest extends TestCase
     {
         $this->cli_ = new Cli(
             [
-                'db' => [
-                    'connection' => static::DSN,
-                    'passwdKey' => random_bytes(8),
-                    'maxOpenInstAge' => 'PT4S'
+                'db' => [ 'connection' => static::DSN ],
+                'passwdKey' => random_bytes(8),
+                'maxOpenInstAge' => 'PT4S',
+                'smtp' => [
+                    'host' => 'smtp.example.info',
+                    'port' => 587,
+                    'username' => 'bob',
+                    'passwd' => 'passw$1234',
+                    'from' => 'bob@example.info'
                 ]
             ]
+        );
+    }
+
+    public function testOptionJsonConfigFile(): void
+    {
+        $this->cli_->process();
+
+        $this->assertSame(
+            'smtp.example.info',
+            $this->cli_->getParams()['smtp']['host']
+        );
+
+        $this->assertSame(
+            'bob@example.info',
+            $this->cli_->getParams()['smtp']['from']
+        );
+
+        $cli2 = new Cli($this->cli_->getParams());
+
+        $cli2->process(
+            '-j ' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'etc'
+            . DIRECTORY_SEPARATOR . 'config_example.json'
+        );
+
+        $this->assertSame(
+            'smtp.example.com',
+            $cli2->getParams()['smtp']['host']
+        );
+
+        $this->assertSame(
+            'alice@example.com',
+            $cli2->getParams()['smtp']['from']
         );
     }
 

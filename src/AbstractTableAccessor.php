@@ -15,14 +15,15 @@ abstract class AbstractTableAccessor extends TableAccessorBase
 
     /**
      * @param $params array or ArrayAccess object containing
-     * - `connection`
-     * - `?string tablePrefix`
+     * - `db`
+     *   - `connection`
+     *   - `?string tablePrefix`
      */
     public static function newFromParams(iterable $params): self
     {
         return new static(
-            $params['connection'],
-            $params['tablePrefix'] ?? null
+            $params['db']['connection'],
+            $params['db']['tablePrefix'] ?? null
         );
     }
 

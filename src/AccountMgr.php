@@ -12,8 +12,11 @@ class AccountMgr
 
     /**
      * @param $params array or ArrayAccess object containing
-     * - `connection`
-     * - `?string tablePrefix`
+     * - `db`
+     *   - `connection`
+     *   - `?string tablePrefix`
+     * - `string passwdKey`
+     * - `string maxOpenInstAge`
      */
     public static function newFromParams(iterable $params): self
     {

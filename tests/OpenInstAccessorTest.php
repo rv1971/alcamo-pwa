@@ -16,8 +16,10 @@ class OpenInstAccessorTest extends TestCase
         $pdo = new \PDO(static::DSN);
 
         $params = [
-            'connection' => $pdo,
-            'tablePrefix' => 'foo_',
+            'db' => [
+                'connection' => $pdo,
+                'tablePrefix' => 'foo_'
+            ],
             'passwdKey' => random_bytes(8),
             'maxOpenInstAge' => 'PT4S'
         ];

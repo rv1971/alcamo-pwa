@@ -1,0 +1,14 @@
+{
+    "db": {
+        "connection": "sqlite::memory:"
+    },
+    "passwdKey": "HY2la0fIOaaYZxGsuY14IA",
+    "maxOpenInstAge": "P3D",
+    "smtp": {
+        "host": "smtp.example.com",
+        "port": 587,
+        "username": "alice",
+        "passwd": "passw$1234",
+        "from": "alice@example.com"
+    }
+}

@@ -43,12 +43,19 @@ EOD;
 
     private $passwdTransformer_; ///< PasswdTransformer
 
+    /**
+     * @param $params array or ArrayAccess object containing
+     * - `db`
+     *   - `connection`
+     *   - `?string tablePrefix`
+     * - `string passwdKey`
+     */
     public static function newFromParams(
         iterable $params
     ): AbstractTableAccessor {
         return new static(
-            $params['connection'],
-            $params['tablePrefix'] ?? null,
+            $params['db']['connection'],
+            $params['db']['tablePrefix'] ?? null,
             new PasswdTransformer($params['passwdKey'])
         );
     }

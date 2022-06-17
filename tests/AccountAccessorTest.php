@@ -14,7 +14,7 @@ class AccountAccessorTest extends TestCase
     public function setUp(): void
     {
         $this->accessor_ = AccountAccessor::newFromParams(
-            [ 'connection' => static::DSN ]
+            [ 'db' => [ 'connection' => static::DSN ] ]
         );
 
         $this->accessor_->createTable();
