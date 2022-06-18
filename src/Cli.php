@@ -167,6 +167,8 @@ class Cli extends AbstractCli
             $this->mailOpenInst($this->getOperand('username'), $obfuscated);
         }
 
+        $this->reportOpenInst($this->getOperand('username'), $obfuscated);
+
         return 0;
     }
 
@@ -328,9 +330,19 @@ class Cli extends AbstractCli
         return 0;
     }
 
+    public function reportOpenInst(string $username, string $obfuscated): void
+    {
+        echo "Created new open instance at {$this->createUrl($username, $obfuscated)}\n";
+    }
+
     public function mailOpenInst(string $username, string $obfuscated): void
     {
         /** To be implemented in derived class. */
+    }
+
+    public function createUrl(string $username, string $obfuscated): string
+    {
+        return "{$this->params_['url']}?u=$username&p=" . bin2hex($obfuscated);
     }
 
     public function setupDatabase(): int
