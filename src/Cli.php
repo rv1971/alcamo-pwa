@@ -124,7 +124,7 @@ class Cli extends AbstractCli
         $this->params_ = $params;
     }
 
-    public function getParams(): array
+    public function getParams(): iterable
     {
         return $this->params_;
     }
