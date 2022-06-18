@@ -81,6 +81,15 @@ class Cli extends AbstractCli
             [],
             [ 'to' => Operand::REQUIRED ],
             'Test the SMTP server'
+        ],
+        'verify-passwd' => [
+            'verifyPasswd',
+            [],
+            [
+                'obfuscated' => Operand::REQUIRED,
+                'passwdHash' => Operand::REQUIRED
+            ],
+            'Verify obfuscated password against hash'
         ]
     ];
 
@@ -364,5 +373,22 @@ class Cli extends AbstractCli
         $this->getMailer()->sendTestMail($this->getOperand('to'));
 
         return 0;
+    }
+
+    public function verifyPasswd(): int
+    {
+        if (
+            $this->getAccountMgr()->getInstAccessor()->getPasswdTransformer()
+                ->verifyObfuscatedPasswd(
+                    hex2bin($this->getOperand('obfuscated')),
+                    $this->getOperand('passwdHash')
+                )
+        ) {
+            echo "Password OK\n";
+            return 0;
+        } else {
+            echo "Password does not match\n";
+            return 1;
+        }
     }
 }
