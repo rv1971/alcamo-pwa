@@ -16,6 +16,9 @@ class OpenInstAccessor extends AbstractTableAccessor
 
     public const GET_STMT = "SELECT * FROM %s WHERE username = ?";
 
+    public const GET_USER_INSTS_STMT =
+        "SELECT * FROM %s WHERE username = ? order by created";
+
     public const ADD_STMT =
         "INSERT INTO %s(passwd_hash, username, created)\n"
         . "  VALUES(?, ?, CURRENT_TIMESTAMP)";
@@ -90,6 +93,14 @@ class OpenInstAccessor extends AbstractTableAccessor
         }
 
         return null;
+    }
+
+    public function getUserInsts(string $username): \Traversable
+    {
+        return $this->query(
+            sprintf(static::GET_USER_INSTS_STMT, $this->tableName_),
+            [ $username ]
+        );
     }
 
     /// @return obfuscated password

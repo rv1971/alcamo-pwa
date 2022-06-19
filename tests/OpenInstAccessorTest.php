@@ -34,7 +34,31 @@ class OpenInstAccessorTest extends TestCase
 
         $accountAccessor_->add('alice');
 
+        $accountAccessor_->add('bob');
+
         $this->accessor_->createTable();
+    }
+
+    public function testGetUserInsts()
+    {
+        $alice1Obfuscated = $this->accessor_->add('alice');
+        $bob1Obfuscated = $this->accessor_->add('bob');
+        $alice2Obfuscated = $this->accessor_->add('alice');
+        $bob2Obfuscated = $this->accessor_->add('bob');
+        $alice3Obfuscated = $this->accessor_->add('alice');
+
+        $i = 0;
+
+        foreach ($this->accessor_->getUserInsts('alice') as $record) {
+            $this->assertSame(
+                'alice',
+                $record->getUsername()
+            );
+
+            $i++;
+        }
+
+        $this->assertSame(3, $i);
     }
 
     public function testAdd()
