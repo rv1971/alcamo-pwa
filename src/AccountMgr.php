@@ -108,7 +108,11 @@ class AccountMgr
             return;
         }
 
-        // remove user if no installations left
+        foreach ($this->openInstAccessor_->getUserInsts($username) as $inst) {
+            return;
+        }
+
+        // remove user if no (open) installations left
         $this->accountAccessor_->remove($username);
     }
 

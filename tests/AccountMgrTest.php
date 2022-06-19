@@ -176,6 +176,31 @@ class AccountMgrTest extends TestCase
         $this->assertNull($this->mgr_->getAccountAccessor()->get('alice'));
     }
 
+    public function testRemove2()
+    {
+        foreach ($this->testData_ as $i => $data) {
+            $this->mgr_->addOrModifyInst(
+                $data->instId,
+                $data->username,
+                $data->obfuscated,
+                $data->userAgent,
+                $data->appVersion
+            );
+        }
+
+        $this->mgr_->getOpenInstAccessor()->add('bob');
+
+        $this->mgr_->removeInst($this->testData_[0]->instId);
+
+        $this->assertSame(3, count($this->mgr_->getInstAccessor()));
+
+        // bob is still there because he has an open ionstallation
+        $this->assertSame(
+            'bob',
+            $this->mgr_->getAccountAccessor()->get('bob')->getUsername()
+        );
+    }
+
     public function testAddOrModifyInstException()
     {
         $this->expectException(DataNotFound::class);
