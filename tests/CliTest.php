@@ -18,6 +18,7 @@ class CliTest extends TestCase
                 'db' => [ 'connection' => static::DSN ],
                 'passwdKey' => random_bytes(8),
                 'maxOpenInstAge' => 'PT4S',
+                'url' => 'https://localhost/myapp',
                 'smtp' => [
                     'host' => 'smtp.example.info',
                     'port' => 587,
