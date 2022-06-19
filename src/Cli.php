@@ -305,7 +305,7 @@ class Cli extends AbstractCli
                     $record->getModified()->format(static::DATE_FMT)
                 );
             }
-    }
+        }
 
         echo "\n";
 

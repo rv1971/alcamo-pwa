@@ -55,6 +55,11 @@ class InstAccessorTest extends TestCase
         $this->accessor_->createTable();
 
         foreach (static::TEST_DATA as $i => $data) {
+            if ($i) {
+                // ensure defined chronological order
+                sleep(1);
+            }
+
             $data = (object)$data;
 
             if (!$accountAccessor_->get($data->username)) {
@@ -153,8 +158,6 @@ class InstAccessorTest extends TestCase
             $this->testData_[0]->instId,
             $this->testData_[2]->instId,
         ];
-
-        sort($expectedInsts);
 
         $this->assertSame($expectedInsts, array_keys($insts));
     }
