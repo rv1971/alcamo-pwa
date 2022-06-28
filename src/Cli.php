@@ -276,7 +276,7 @@ class Cli extends AbstractCli
             }
         } else {
             printf(
-                static::INST_LIST_DETAIL_FMT,
+                static::INST_LIST_FMT,
                 'username',
                 'id',
                 'user-agent',
