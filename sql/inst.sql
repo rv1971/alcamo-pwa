@@ -9,5 +9,5 @@ create table /*_*/inst(
   modified timestamp not null,
   constraint /*_*/inst_pk primary key (inst_id),
   constraint /*_*/inst_account_fk foreign key (username)
-    references /*_*/account
+    references /*_*/account(username)
 );

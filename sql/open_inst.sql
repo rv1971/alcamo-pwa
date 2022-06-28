@@ -4,5 +4,5 @@ create table /*_*/open_inst(
   created timestamp not null,
   constraint /*_*/open_inst_pk primary key (passwd_hash),
   constraint /*_*/open_inst_account_fk foreign key (username)
-    references /*_*/account
+    references /*_*/account(username)
 );
