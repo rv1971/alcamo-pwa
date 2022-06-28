@@ -341,7 +341,9 @@ class Cli extends AbstractCli
 
     public function reportOpenInst(string $username, string $obfuscated): void
     {
-        echo "Created new open instance at {$this->createUrl($username, $obfuscated)}\n";
+        $this->reportProgress(
+            "Created new open instance at {$this->createUrl($username, $obfuscated)}"
+        );
     }
 
     public function mailOpenInst(string $username, string $obfuscated): void
@@ -384,10 +386,10 @@ class Cli extends AbstractCli
                     $this->getOperand('passwdHash')
                 )
         ) {
-            echo "Password OK\n";
+            $this->reportProgress("Password OK");
             return 0;
         } else {
-            echo "Password does not match\n";
+            $this->reportProgress("Password does not match");
             return 1;
         }
     }
