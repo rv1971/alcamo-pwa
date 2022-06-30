@@ -15,7 +15,7 @@ class OpenInstAccessorTest extends TestCase
     {
         $pdo = new \PDO(static::DSN);
 
-        $params = [
+        $conf = [
             'db' => [
                 'connection' => $pdo,
                 'tablePrefix' => 'foo_'
@@ -26,9 +26,9 @@ class OpenInstAccessorTest extends TestCase
 
         $pdo->query('PRAGMA foreign_keys = ON');
 
-        $this->accessor_ = OpenInstAccessor::newFromParams($params);
+        $this->accessor_ = OpenInstAccessor::newFromConf($conf);
 
-        $accountAccessor_ = AccountAccessor::newFromParams($params);
+        $accountAccessor_ = AccountAccessor::newFromConf($conf);
 
         $accountAccessor_->createTable();
 

@@ -36,15 +36,15 @@ class CliTest extends TestCase
 
         $this->assertSame(
             'smtp.example.info',
-            $this->cli_->getParams()['smtp']['host']
+            $this->cli_->getConf()['smtp']['host']
         );
 
         $this->assertSame(
             'bob@example.info',
-            $this->cli_->getParams()['smtp']['from']
+            $this->cli_->getConf()['smtp']['from']
         );
 
-        $cli2 = new Cli($this->cli_->getParams());
+        $cli2 = new Cli($this->cli_->getConf());
 
         $cli2->process(
             '-j ' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'etc'
@@ -54,12 +54,12 @@ class CliTest extends TestCase
 
         $this->assertSame(
             'smtp.example.com',
-            $cli2->getParams()['smtp']['host']
+            $cli2->getConf()['smtp']['host']
         );
 
         $this->assertSame(
             'alice@example.com',
-            $cli2->getParams()['smtp']['from']
+            $cli2->getConf()['smtp']['from']
         );
     }
 
@@ -67,12 +67,12 @@ class CliTest extends TestCase
     {
         $dbAccessor = new DbAccessor(self::DSN);
 
-        $params = $this->cli_->getParams();
-        $params['db']['connection'] = $dbAccessor;
+        $conf = $this->cli_->getConf();
+        $conf['db']['connection'] = $dbAccessor;
 
-        (new Cli($params))->process('setup-database');
+        (new Cli($conf))->process('setup-database');
 
-        $cli3 = new Cli($params);
+        $cli3 = new Cli($conf);
 
         $cli3->process('add alice');
 

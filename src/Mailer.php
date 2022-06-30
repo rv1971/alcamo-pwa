@@ -31,7 +31,7 @@ EOD;
     public const TESTMAIL_CONTENT_TYPE = self::CONTENT_TYPE_TEXT_HTML;
 
      /**
-     * @param $params array or ArrayAccess object containing
+     * @param $conf array or ArrayAccess object containing
      * - `host`
      * - `port`
      * - `username`
@@ -39,15 +39,15 @@ EOD;
      * - `from`
      * - `?bool debug`
      */
-    public function newFromParams(iterable $params): self
+    public function newFromConf(iterable $conf): self
     {
         return new self(
-            $params['host'],
-            $params['port'],
-            $params['username'],
-            $params['passwd'],
-            $params['from'],
-            $params['debug'] ?? null
+            $conf['host'],
+            $conf['port'],
+            $conf['username'],
+            $conf['passwd'],
+            $conf['from'],
+            $conf['debug'] ?? null
         );
     }
 

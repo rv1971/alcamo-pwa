@@ -108,25 +108,25 @@ class Cli extends AbstractCli
 
     public const DATE_FMT = 'Y-m-d';
 
-    protected $params_;
+    protected $conf_;
     protected $accountMgr_;
     protected $mailer_;
 
     /**
-     * @param $params array or ArrayAccess object containing
+     * @param $conf array or ArrayAccess object containing
      * - `db`
      * - `smtp`
      */
-    public function __construct(iterable $params)
+    public function __construct(iterable $conf)
     {
         parent::__construct();
 
-        $this->params_ = $params;
+        $this->conf_ = $conf;
     }
 
-    public function getParams(): iterable
+    public function getConf(): iterable
     {
-        return $this->params_;
+        return $this->conf_;
     }
 
     public function getAccountMgr(): AccountMgr
@@ -149,19 +149,19 @@ class Cli extends AbstractCli
         }
 
         if ($this->getOption('json-config-file')) {
-            $this->params_ = json_decode(
+            $this->conf_ = json_decode(
                 file_get_contents($this->getOption('json-config-file')),
                 true
             );
         }
 
-        $this->accountMgr_ = AccountMgr::newFromParams($this->params_);
+        $this->accountMgr_ = AccountMgr::newFromConf($this->conf_);
 
         if ($this->getOption('verbose') > 0) {
-            $this->params_['smtp']['debug'] = true;
+            $this->conf_['smtp']['debug'] = true;
         }
 
-        $this->mailer_ = Mailer::newFromParams($this->params_['smtp']);
+        $this->mailer_ = Mailer::newFromConf($this->conf_['smtp']);
 
         return $this->{$this->getCommand()->getHandler()}();
     }
@@ -353,7 +353,7 @@ class Cli extends AbstractCli
 
     public function createUrl(string $username, string $obfuscated): string
     {
-        return "{$this->params_['url']}?u=$username&p=" . bin2hex($obfuscated);
+        return "{$this->conf_['url']}?u=$username&p=" . bin2hex($obfuscated);
     }
 
     public function setupDatabase(): int

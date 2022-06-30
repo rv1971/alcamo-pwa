@@ -29,21 +29,21 @@ class OpenInstAccessor extends AbstractTableAccessor
     private $maxAge_;            ///< Duration
 
     /**
-     * @param $params array or ArrayAccess object containing
+     * @param $conf array or ArrayAccess object containing
      * - `db`
      *   - `connection`
      *   - `?string tablePrefix`
      * - `string passwdKey`
      * - `string maxOpenInstAge`
      */
-    public static function newFromParams(
-        iterable $params
+    public static function newFromConf(
+        iterable $conf
     ): AbstractTableAccessor {
         return new static(
-            $params['db']['connection'],
-            $params['db']['tablePrefix'] ?? null,
-            new PasswdTransformer($params['passwdKey']),
-            new Duration($params['maxOpenInstAge'])
+            $conf['db']['connection'],
+            $conf['db']['tablePrefix'] ?? null,
+            new PasswdTransformer($conf['passwdKey']),
+            new Duration($conf['maxOpenInstAge'])
         );
     }
 

@@ -39,7 +39,7 @@ class AccountMgrTest extends TestCase
 
     public function setUp(): void
     {
-        $this->mgr_ = AccountMgr::newFromParams(
+        $this->mgr_ = AccountMgr::newFromConf(
             [
                 'db' => [ 'connection' => static::DSN ],
                 'passwdKey' => random_bytes(8),

@@ -11,19 +11,19 @@ class AccountMgr
     private $instAccessor_;     ///< InstAccessor;
 
     /**
-     * @param $params array or ArrayAccess object containing
+     * @param $conf array or ArrayAccess object containing
      * - `db`
      *   - `connection`
      *   - `?string tablePrefix`
      * - `string passwdKey`
      * - `string maxOpenInstAge`
      */
-    public static function newFromParams(iterable $params): self
+    public static function newFromConf(iterable $conf): self
     {
         return new static(
-            AccountAccessor::newFromParams($params),
-            OpenInstAccessor::newFromParams($params),
-            InstAccessor::newFromParams($params)
+            AccountAccessor::newFromConf($conf),
+            OpenInstAccessor::newFromConf($conf),
+            InstAccessor::newFromConf($conf)
         );
     }
 
