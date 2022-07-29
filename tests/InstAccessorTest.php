@@ -156,7 +156,27 @@ class InstAccessorTest extends TestCase
 
         $expectedInsts = [
             $this->testData_[0]->instId,
-            $this->testData_[2]->instId,
+            $this->testData_[2]->instId
+        ];
+
+        $this->assertSame($expectedInsts, array_keys($insts));
+    }
+
+    public function testGetUserUserAgentInsts()
+    {
+        $insts = [];
+
+        foreach (
+            $this->accessor_->getUserUserAgentInsts(
+                'bob',
+                'BlackBerry9800/5.0.0.690'
+            ) as $record
+        ) {
+            $insts[$record->getInstId()] = $record;
+        }
+
+        $expectedInsts = [
+            $this->testData_[2]->instId
         ];
 
         $this->assertSame($expectedInsts, array_keys($insts));

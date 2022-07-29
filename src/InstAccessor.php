@@ -13,10 +13,14 @@ class InstAccessor extends AbstractTableAccessor
     public const SELECT_STMT =
         'SELECT * FROM %s ORDER BY username, modified DESC LIMIT 100';
 
-    public const GET_STMT = "SELECT * FROM %s WHERE inst_id = ?";
+    public const GET_STMT = 'SELECT * FROM %s WHERE inst_id = ?';
 
     public const GET_USER_INSTS_STMT =
-        "SELECT * FROM %s WHERE username = ? order by modified";
+        'SELECT * FROM %s WHERE username = ? ORDER BY modified';
+
+    public const GET_USER_USER_AGENT_INSTS_STMT =
+        'SELECT * FROM %s WHERE username = ? and user_agent = ? '
+        . 'ORDER BY modified';
 
     public const ADD_STMT = <<<EOD
 INSERT INTO %s(
@@ -131,6 +135,16 @@ EOD;
         return $this->query(
             sprintf(static::GET_USER_INSTS_STMT, $this->tableName_),
             [ $username ]
+        );
+    }
+
+    public function getUserUserAgentInsts(
+        string $username,
+        string $userAgent
+    ): \Traversable {
+        return $this->query(
+            sprintf(static::GET_USER_USER_AGENT_INSTS_STMT, $this->tableName_),
+            [ $username, $userAgent ]
         );
     }
 
