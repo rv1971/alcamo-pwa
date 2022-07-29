@@ -4,6 +4,7 @@
     },
     "passwdKey": "HY2la0fIOaaYZxGsuY14IA",
     "maxOpenInstAge": "P3D",
+    "maxPrevInstAge": "PT1H",
     "url": "https://localhost/myapp",
     "smtp": {
         "host": "smtp.example.com",

@@ -3,12 +3,15 @@
 namespace alcamo\pwa;
 
 use alcamo\exception\DataNotFound;
+use alcamo\time\Duration;
 
 class AccountMgr
 {
     private $accountAccessor_;  ///< AccountAccessor;
     private $openInstAccessor_; ///< OpenInstAccessor;
     private $instAccessor_;     ///< InstAccessor;
+
+    private $maxPrevInstAge_;   /// Duration
 
     /**
      * @param $conf array or ArrayAccess object containing
@@ -17,24 +20,29 @@ class AccountMgr
      *   - `?string tablePrefix`
      * - `string passwdKey`
      * - `string maxOpenInstAge`
+     * - `string maxPrevInstAge`
      */
     public static function newFromConf(iterable $conf): self
     {
         return new static(
             AccountAccessor::newFromConf($conf),
             OpenInstAccessor::newFromConf($conf),
-            InstAccessor::newFromConf($conf)
+            InstAccessor::newFromConf($conf),
+            new Duration($conf['maxPrevInstAge'])
         );
     }
 
     public function __construct(
         AccountAccessor $accountAccessor,
         OpenInstAccessor $openInstAccessor,
-        InstAccessor $instAccessor
+        InstAccessor $instAccessor,
+        Duration $maxPrevInstAge
     ) {
         $this->accountAccessor_ = $accountAccessor;
         $this->openInstAccessor_ = $openInstAccessor;
         $this->instAccessor_ = $instAccessor;
+
+        $this->maxPrevInstAge_ = $maxPrevInstAge;
     }
 
     public function getAccountAccessor(): AccountAccessor
@@ -70,17 +78,25 @@ class AccountMgr
         string $userAgent,
         string $appVersion
     ): void {
-        $inst = $this->instAccessor_->get($instId, $username, $obfuscated);
+        $instAccessor = $this->instAccessor_;
+
+        $inst = $instAccessor->get($instId, $username, $obfuscated);
+
+        /** If the specified instance exists and the username/password
+         *  matches, use it. */
 
         if (isset($inst)) {
-            $this->instAccessor_->modify($instId, $userAgent, $appVersion);
+            $instAccessor->modify($instId, $userAgent, $appVersion);
             return;
         }
 
         $openInst = $this->openInstAccessor_->get($username, $obfuscated);
 
+        /** Otherwise, if there is an open instance and the username/password
+         *  matches, transform it to an instance. */
+
         if (isset($openInst)) {
-            $this->instAccessor_->add(
+            $instAccessor->add(
                 $instId,
                 $username,
                 $openInst->getPasswdHash(),
@@ -89,6 +105,47 @@ class AccountMgr
             );
 
             $this->openInstAccessor_->remove($openInst->getPasswdHash());
+
+            return;
+        }
+
+        /** Otherwise, if there is exactly one instance with a matching
+         *  username/password which has exactly the same user agent
+         *  information and has been modified at most $maxPrevInstAge_ ago,
+         *  create a new instance.
+         *
+         * This is needed because some iPhones create a new instance when
+         * adding a link to the home screen.
+         */
+
+        $instCandidates = [];
+
+        foreach (
+            $instAccessor->getUserUserAgentInsts($username, $userAgent) as $inst
+        ) {
+            if (
+                $instAccessor->getPasswdTransformer()->verifyObfuscatedPasswd(
+                    $obfuscated,
+                    $inst->getPasswdHash()
+                )
+            ) {
+                $instCandidates[] = $inst;
+            }
+        }
+
+        if (
+            count($instCandidates) == 1
+            && $instCandidates[0]->getModified()->add($this->maxPrevInstAge_)
+                ->getTimestamp()
+            > (new \DateTimeImmutable())->getTimestamp()
+        ) {
+            $instAccessor->add(
+                $instId,
+                $username,
+                $inst->getPasswdHash(),
+                $userAgent,
+                $appVersion
+            );
 
             return;
         }

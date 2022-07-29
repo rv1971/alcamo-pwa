@@ -43,7 +43,8 @@ class AccountMgrTest extends TestCase
             [
                 'db' => [ 'connection' => static::DSN ],
                 'passwdKey' => random_bytes(8),
-                'maxOpenInstAge' => 'PT4S'
+                'maxOpenInstAge' => 'PT4S',
+                'maxPrevInstAge' => 'PT2S'
             ]
         );
 
@@ -117,7 +118,6 @@ class AccountMgrTest extends TestCase
 
         $appVersion = '1.1.0';
 
-        // test successful modify
         $this->mgr_->addOrModifyInst(
             $this->testData_[0]->instId,
             $this->testData_[0]->username,
@@ -138,6 +138,119 @@ class AccountMgrTest extends TestCase
         $this->assertSame($appVersion, $inst->getAppVersion());
 
         $this->assertSame(1, $inst->getUpdateCount());
+
+        // test successful second instance on same device
+
+        $secondInstId = Uuid::uuid_create();
+
+        $this->mgr_->addOrModifyInst(
+            $secondInstId,
+            $this->testData_[0]->username,
+            $this->testData_[0]->obfuscated,
+            $userAgent,
+            $appVersion
+        );
+
+        $this->assertSame(5, count($this->mgr_->getInstAccessor()));
+
+        $secondInst = $this->mgr_->getInstAccessor()->get($secondInstId);
+
+        $this->assertInstanceOf(InstRecord::class, $secondInst);
+
+        // test that third instance cannot be added#
+
+        $thirdInstId = Uuid::uuid_create();
+
+        $this->expectException(DataNotFound::class);
+        $this->expectExceptionMessage($thirdInstId);
+
+        $this->mgr_->addOrModifyInst(
+            $thirdInstId,
+            $this->testData_[0]->username,
+            $this->testData_[0]->obfuscated,
+            $userAgent,
+            $appVersion
+        );
+    }
+
+    public function testSecondUSDerAgentCheck()
+    {
+        foreach ($this->testData_ as $i => $data) {
+            $this->mgr_->addOrModifyInst(
+                $data->instId,
+                $data->username,
+                $data->obfuscated,
+                $data->userAgent,
+                $data->appVersion
+            );
+        }
+
+        $secondInstId = Uuid::uuid_create();
+
+        $this->expectException(DataNotFound::class);
+        $this->expectExceptionMessage($secondInstId);
+
+        $this->mgr_->addOrModifyInst(
+            $secondInstId,
+            $this->testData_[0]->username,
+            $this->testData_[0]->obfuscated,
+            $this->testData_[2]->userAgent,
+            $this->testData_[0]->appVersion
+        );
+    }
+
+    public function testSecondInstPasswdCheck()
+    {
+        foreach ($this->testData_ as $i => $data) {
+            $this->mgr_->addOrModifyInst(
+                $data->instId,
+                $data->username,
+                $data->obfuscated,
+                $data->userAgent,
+                $data->appVersion
+            );
+        }
+
+        $secondInstId = Uuid::uuid_create();
+
+        $this->expectException(DataNotFound::class);
+        $this->expectExceptionMessage($secondInstId);
+
+        $this->mgr_->addOrModifyInst(
+            $secondInstId,
+            $this->testData_[0]->username,
+            $this->testData_[1]->obfuscated,
+            $this->testData_[0]->userAgent,
+            $this->testData_[0]->appVersion
+        );
+    }
+
+    public function testSecondInstExpiryCheck()
+    {
+        foreach ($this->testData_ as $i => $data) {
+            $this->mgr_->addOrModifyInst(
+                $data->instId,
+                $data->username,
+                $data->obfuscated,
+                $data->userAgent,
+                $data->appVersion
+            );
+        }
+
+        $secondInstId = Uuid::uuid_create();
+
+        sleep(3);
+
+        $this->expectException(DataNotFound::class);
+        $this->expectExceptionMessage($secondInstId);
+
+        $this->mgr_->addOrModifyInst(
+            $secondInstId,
+            $this->testData_[0]->username,
+            $this->testData_[0]->obfuscated,
+            $this->testData_[0]->userAgent,
+            $this->testData_[0]->appVersion
+        );
     }
 
     public function testRemove()
