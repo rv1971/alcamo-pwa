@@ -44,6 +44,11 @@ class Cli extends AbstractCli
                     GetOpt::NO_ARGUMENT,
                     'Detailed app version'
                 ],
+                'timestamp-detail' => [
+                    null,
+                    GetOpt::NO_ARGUMENT,
+                    'Detailed timestamp'
+                ],
                 'user-agent-detail' => [
                     null,
                     GetOpt::NO_ARGUMENT,
@@ -101,6 +106,9 @@ class Cli extends AbstractCli
 
     public const INST_LIST_APP_VERSION_DETAIL_FMT =
         "%-24s  %-6s  %-32s  %-10s\n";
+
+    public const INST_LIST_TIMESTAMP_DETAIL_FMT =
+        "%-24s  %-6s  %-14s  %-8s  %-19s\n";
 
     public const OPEN_INST_LIST_FMT = "%-58s  %-19s\n";
 
@@ -243,7 +251,7 @@ class Cli extends AbstractCli
                     static::INST_LIST_USER_AGENT_DETAIL_FMT,
                     substr($record->getUsername(), 0, 24),
                     $record->getShortInstId(),
-                    substr($record->getUserAgent(), 0, 45)
+                    substr(str_replace('Mozilla/5.0 ', '', $record->getUserAgent()), 0, 45)
                 );
             }
         } elseif ($this->getOption('app-version-detail')) {
@@ -274,6 +282,37 @@ class Cli extends AbstractCli
                     $record->getModified()->format(static::DATE_FMT)
                 );
             }
+        } elseif ($this->getOption('timestamp-detail')) {
+            printf(
+                static::INST_LIST_TIMESTAMP_DETAIL_FMT,
+                'username',
+                'id',
+                'user-agent',
+                'version',
+                'modified'
+            );
+
+            printf(
+                static::INST_LIST_TIMESTAMP_DETAIL_FMT,
+                '------------------------',
+                '------',
+                '--------------',
+                '--------',
+                '-------------------'
+            );
+
+            echo "\n";
+
+            foreach ($iterator as $record) {
+                printf(
+                    static::INST_LIST_TIMESTAMP_DETAIL_FMT,
+                    substr($record->getUsername(), 0, 24),
+                    $record->getShortInstId(),
+                    substr(str_replace('Mozilla/5.0 ', '', $record->getUserAgent()), 0, 14),
+                    substr($record->getAppVersion(), 0, 8),
+                    $record->getModified()->format(static::TIMESTAMP_FMT)
+                );
+            }
         } else {
             printf(
                 static::INST_LIST_FMT,
@@ -300,7 +339,7 @@ class Cli extends AbstractCli
                     static::INST_LIST_FMT,
                     substr($record->getUsername(), 0, 24),
                     $record->getShortInstId(),
-                    substr($record->getUserAgent(), 0, 23),
+                    substr(str_replace('Mozilla/5.0 ', '', $record->getUserAgent()), 0, 23),
                     substr($record->getAppVersion(), 0, 8),
                     $record->getModified()->format(static::DATE_FMT)
                 );
