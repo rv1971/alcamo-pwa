@@ -11,7 +11,7 @@ class InstAccessor extends AbstractTableAccessor
     public const TABLE_NAME = 'inst';
 
     public const SELECT_STMT =
-        'SELECT * FROM %s ORDER BY username, modified DESC LIMIT 100';
+        'SELECT * FROM %s ORDER BY username, modified DESC LIMIT 1000';
 
     public const GET_STMT = 'SELECT * FROM %s WHERE inst_id = ?';
 

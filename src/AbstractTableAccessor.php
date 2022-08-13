@@ -6,6 +6,8 @@ use alcamo\dao\{Statement, TableAccessor as TableAccessorBase};
 
 abstract class AbstractTableAccessor extends TableAccessorBase
 {
+    public const SELECT_STMT = 'SELECT * FROM %s ORDER BY 1, 2, 3 LIMIT 1000';
+
     private $tablePrefix_; ///< ?string
 
     private $getStmt_;    ///< Statement
