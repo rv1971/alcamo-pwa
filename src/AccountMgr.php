@@ -32,6 +32,58 @@ class AccountMgr
         );
     }
 
+    /** Check whether two user agent strings are so similar that they may
+     * plausibly belong to the same device.
+     *
+     * There are indeed mobile devices which send a different user agent
+     * string depending whether a link is opened in a browser or from the home
+     * screen. */
+    public static function isSimilarUserAgent(
+        string $userAgent1,
+        string $userAgent2
+    ): bool {
+        $pos1 = strpos($userAgent1, ')');
+        $pos2 = strpos($userAgent2, ')');
+
+        /** - If one of the strings does not contain a closing parenthesis,
+         * return true iff the strings are euqal. */
+        if ($pos1 === false || $pos2 === false) {
+            return $userAgent1 == $userAgent2;
+        }
+
+        /** - Otherwise, extract prefixes until the first closing
+         * parenthesis. If the prefixes are equal, return true. */
+        $prefix1 = substr($userAgent1, 0, $pos1);
+        $prefix2 = substr($userAgent2, 0, $pos2);
+
+        if ($prefix1 == $prefix2) {
+            return true;
+        }
+
+        /** - Otherwise, if one of the prefixes does not contain two
+         * semicolons, return false. */
+        $pos1 = strpos($prefix1, ';');
+        $pos2 = strpos($prefix2, ';');
+
+        if ($pos1 === false || $pos2 === false) {
+            return false;
+        }
+
+        $pos1 = strpos($prefix1, ';', $pos1 + 1);
+        $pos2 = strpos($prefix2, ';', $pos2 + 1);
+
+        if ($pos1 === false || $pos2 === false) {
+            return false;
+        }
+
+        /** - Otherwise, extract prefixes until the second semicolon, and
+         * return true iff they are equal. */
+        $prefix1 = substr($userAgent1, 0, $pos1);
+        $prefix2 = substr($userAgent2, 0, $pos2);
+
+        return $prefix1 == $prefix2;
+    }
+
     public function __construct(
         AccountAccessor $accountAccessor,
         OpenInstAccessor $openInstAccessor,
@@ -110,9 +162,9 @@ class AccountMgr
         }
 
         /** Otherwise, if there is exactly one instance with a matching
-         *  username/password which has exactly the same user agent
-         *  information and has been modified at most $maxPrevInstAge_ ago,
-         *  create a new instance.
+         *  username/password which has a similar user agent information and
+         *  has been modified at most $maxPrevInstAge_ ago, create a new
+         *  instance.
          *
          * This is needed because some iPhones create a new instance when
          * adding a link to the home screen.
@@ -121,7 +173,7 @@ class AccountMgr
         $instCandidates = [];
 
         foreach (
-            $instAccessor->getUserUserAgentInsts($username, $userAgent) as $inst
+            $instAccessor->getUserInsts($username) as $inst
         ) {
             if (
                 $instAccessor->getPasswdTransformer()->verifyObfuscatedPasswd(
@@ -129,7 +181,14 @@ class AccountMgr
                     $inst->getPasswdHash()
                 )
             ) {
-                $instCandidates[] = $inst;
+                if (
+                    static::isSimilarUserAgent(
+                        $userAgent,
+                        $inst->getUserAgent()
+                    )
+                ) {
+                    $instCandidates[] = $inst;
+                }
             }
         }
 
@@ -143,7 +202,7 @@ class AccountMgr
                 $instId,
                 $username,
                 $inst->getPasswdHash(),
-                $userAgent,
+                $inst->getUserAgent(),
                 $appVersion
             );
 

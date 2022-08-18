@@ -61,6 +61,60 @@ class AccountMgrTest extends TestCase
         }
     }
 
+    /**
+     * @dataProvider isSimilarUserAgentProvider
+     */
+    public function testIsSimilarUserAgent(
+        $userAgent1,
+        $userAgent2,
+        $expectedResult
+    ) {
+        $this->assertSame(
+            $expectedResult,
+            AccountMgr::isSimilarUserAgent($userAgent1, $userAgent2)
+        );
+    }
+
+    public function isSimilarUserAgentProvider()
+    {
+        return [
+            'no-parenthesis-false' => [
+                'BlackBerry9900/5.1.0.692',
+                'BlackBerry9800/5.0.0.690',
+                false
+            ],
+            'no-parenthesis-false' => [
+                'BlackBerry9900/5.1.0.692',
+                'BlackBerry9900/5.1.0.692',
+                true
+            ],
+            'parentheses-equal' => [
+                'Wget/1.20.3 (linux-gnu) foo/bar',
+                'Wget/1.20.3 (linux-gnu) bar/baz',
+                true
+            ],
+            'one-semicolon-true' => [
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 14_8_1 like Mac OS X) baz',
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 14_8_1 like Mac OS X) qux',
+                true
+            ],
+            'two-semicolons-true' => [
+                'Mozilla/5.0 (Linux; Android 12; SAMSUNG SM-A415F) '
+                . 'AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/18.0 '
+                . 'Chrome/99.0.4844.88 Mobile Safari/537.36',
+                'Mozilla/5.0 (Linux; Android 12; SM-A415F) '
+                . 'AppleWebKit/537.36 (KHTML, like Gecko) '
+                . 'Chrome/104.0.0.0 Mobile Safari/537.36',
+                true
+            ],
+            'two-semicolons-false' => [
+                'Mozilla/5.0 (Linux; Android 12; SAMSUNG SM-A415F) AppleWebKit/537.36',
+                'Mozilla/5.0 (Linux; Android 8.0.0; WAS-LX1A) AppleWebKit/537.36',
+                false
+            ]
+        ];
+    }
+
     public function testAddOpenInst()
     {
         foreach ($this->mgr_->getAccountAccessor() as $record) {
@@ -114,7 +168,7 @@ class AccountMgrTest extends TestCase
         }
 
         // test successful modify
-        $userAgent = 'Mozilla/5.0 (BobDevice 2.0)';
+        $userAgent1 = 'Mozilla/5.0 (Linux; Android 12; SAMSUNG SM-A415F) AppleWebKit/537.36';
 
         $appVersion = '1.1.0';
 
@@ -122,7 +176,7 @@ class AccountMgrTest extends TestCase
             $this->testData_[0]->instId,
             $this->testData_[0]->username,
             $this->testData_[0]->obfuscated,
-            $userAgent,
+            $userAgent1,
             $appVersion
         );
 
@@ -133,7 +187,7 @@ class AccountMgrTest extends TestCase
         $inst = $this->mgr_->getInstAccessor()
             ->get($this->testData_[0]->instId);
 
-        $this->assertSame($userAgent, $inst->getUserAgent());
+        $this->assertSame($userAgent1, $inst->getUserAgent());
 
         $this->assertSame($appVersion, $inst->getAppVersion());
 
@@ -143,11 +197,13 @@ class AccountMgrTest extends TestCase
 
         $secondInstId = Uuid::uuid_create();
 
+        $userAgent2 = 'Mozilla/5.0 (Linux; Android 12; SM-A415F) AppleWebKit/537.36';
+
         $this->mgr_->addOrModifyInst(
             $secondInstId,
             $this->testData_[0]->username,
             $this->testData_[0]->obfuscated,
-            $userAgent,
+            $userAgent2,
             $appVersion
         );
 
@@ -157,7 +213,7 @@ class AccountMgrTest extends TestCase
 
         $this->assertInstanceOf(InstRecord::class, $secondInst);
 
-        // test that third instance cannot be added#
+        // test that third instance cannot be added
 
         $thirdInstId = Uuid::uuid_create();
 
@@ -168,12 +224,12 @@ class AccountMgrTest extends TestCase
             $thirdInstId,
             $this->testData_[0]->username,
             $this->testData_[0]->obfuscated,
-            $userAgent,
+            $userAgent1,
             $appVersion
         );
     }
 
-    public function testSecondUSDerAgentCheck()
+    public function testSecondUserAgentCheck()
     {
         foreach ($this->testData_ as $i => $data) {
             $this->mgr_->addOrModifyInst(
