@@ -39,6 +39,11 @@ class Cli extends AbstractCli
         'list-insts' => [
             'listInsts',
             [
+                'detail' => [
+                    null,
+                    GetOpt::NO_ARGUMENT,
+                    'Details with one property per line'
+                ],
                 'app-version-detail' => [
                     null,
                     GetOpt::NO_ARGUMENT,
@@ -101,6 +106,13 @@ class Cli extends AbstractCli
     public const ACCOUNT_LIST_FMT = "%-37s  %-19s  %-19s\n";
 
     public const INST_LIST_FMT = "%-24s  %-6s %-23s  %-8s  %-10s\n";
+
+    public const INST_LIST_DETAIL_FMT =
+          "username:    %s\n"
+        . "instance id: %s\n"
+        . "user agent:  %s\n"
+        . "app version: %s\n"
+        . "modified:    %s\n\n";
 
     public const INST_LIST_USER_AGENT_DETAIL_FMT = "%-24s  %-6s  %-45s\n";
 
@@ -229,7 +241,18 @@ class Cli extends AbstractCli
 
         echo "\n";
 
-        if ($this->getOption('user-agent-detail')) {
+        if ($this->getOption('detail')) {
+            foreach ($iterator as $record) {
+                printf(
+                    static::INST_LIST_DETAIL_FMT,
+                    $record->getUsername(),
+                    $record->getInstId(),
+                    $record->getUserAgent(),
+                    $record->getAppVersion(),
+                    $record->getModified()->format(static::TIMESTAMP_FMT)
+                );
+            }
+        } elseif ($this->getOption('user-agent-detail')) {
             printf(
                 static::INST_LIST_USER_AGENT_DETAIL_FMT,
                 'username',
