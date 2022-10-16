@@ -112,6 +112,7 @@ class Cli extends AbstractCli
         . "instance id: %s\n"
         . "user agent:  %s\n"
         . "app version: %s\n"
+        . "created:     %s\n"
         . "modified:    %s\n\n";
 
     public const INST_LIST_USER_AGENT_DETAIL_FMT = "%-24s  %-6s  %-45s\n";
@@ -249,6 +250,7 @@ class Cli extends AbstractCli
                     $record->getInstId(),
                     $record->getUserAgent(),
                     $record->getAppVersion(),
+                    $record->getCreated()->format(static::TIMESTAMP_FMT),
                     $record->getModified()->format(static::TIMESTAMP_FMT)
                 );
             }
