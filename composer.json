@@ -6,7 +6,7 @@
     "require": {
         "php": "7.3 - 8.0",
         "alcamo/cli": "^0.3",
-        "alcamo/core": "^0.5",
+        "alcamo/core": "^0.6",
         "alcamo/dao": "^0.5",
         "composer-runtime-api": "^2.2",
         "phpmailer/phpmailer": "^6.6"
