@@ -112,6 +112,7 @@ class Cli extends AbstractCli
         . "instance id: %s\n"
         . "user agent:  %s\n"
         . "app version: %s\n"
+        . "passwh hash: %s\n"
         . "created:     %s\n"
         . "modified:    %s\n\n";
 
@@ -250,6 +251,7 @@ class Cli extends AbstractCli
                     $record->getInstId(),
                     $record->getUserAgent(),
                     $record->getAppVersion(),
+                    $record->getPasswdHash(),
                     $record->getCreated()->format(static::TIMESTAMP_FMT),
                     $record->getModified()->format(static::TIMESTAMP_FMT)
                 );
