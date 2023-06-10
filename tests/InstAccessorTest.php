@@ -184,11 +184,22 @@ class InstAccessorTest extends TestCase
 
     public function testModify()
     {
+        $userAgent = 'BlackBerry9800/5.0.0.693';
+
+        $this->accessor_->modify($this->testData_[2]->instId, $userAgent);
+
+        $inst = $this->accessor_->get($this->testData_[2]->instId);
+
+        $this->assertSame($userAgent, $inst->getUserAgent());
+    }
+
+    public function testUpdateInst()
+    {
         $userAgent = 'BlackBerry9800/5.0.0.691';
 
         $appVersion = '0.43.2';
 
-        $this->accessor_->modify(
+        $this->accessor_->updateInst(
             $this->testData_[2]->instId,
             $userAgent,
             $appVersion

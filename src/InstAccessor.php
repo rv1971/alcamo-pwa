@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\dao\Statement;
 use alcamo\exception\DataNotFound;
 
 class InstAccessor extends AbstractTableAccessor
@@ -39,14 +40,22 @@ EOD;
     public const MODIFY_STMT = <<<EOD
 UPDATE %s SET
     user_agent = ?,
-    app_version = ?,
-    update_count = update_count + 1,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
 EOD;
 
     public const REMOVE_STMT = "DELETE FROM %s WHERE inst_id = ?";
 
+    public const UPDATE_INST_STMT = <<<EOD
+UPDATE %s SET
+    user_agent = ?,
+    app_version = ?,
+    update_count = update_count + 1,
+    modified = CURRENT_TIMESTAMP
+WHERE inst_id = ?
+EOD;
+
+    private $updateInstStmt_;    ///< Statement
     private $passwdTransformer_; ///< PasswdTransformer
 
     /**
@@ -165,12 +174,28 @@ EOD;
         );
     }
 
-    public function modify(
+    public function modify(string $instId, string $userAgent): void
+    {
+        $stmt = $this->getModifyStmt();
+
+        $stmt->execute([ $userAgent, $instId ]);
+
+        if (!$stmt->rowCount()) {
+            throw (new DataNotFound())->setMessageContext(
+                [
+                    'inTable' => $this->tableName_,
+                    'forKey' => $instId
+                ]
+            );
+        }
+    }
+
+    public function updateInst(
         string $instId,
         string $userAgent,
         string $appVersion
     ): void {
-        $stmt = $this->getModifyStmt();
+        $stmt = $this->getUpdateInstStmt();
 
         $stmt->execute([ $userAgent, $appVersion, $instId ]);
 
@@ -178,7 +203,7 @@ EOD;
             throw (new DataNotFound())->setMessageContext(
                 [
                     'inTable' => $this->tableName_,
-                    'forKey' => $passwdHash
+                    'forKey' => $instId
                 ]
             );
         }
@@ -198,5 +223,16 @@ EOD;
                 ]
             );
         }
+    }
+
+    protected function getUpdateInstStmt(): Statement
+    {
+        if (!isset($this->updateInstStmt_)) {
+            $this->updateInstStmt_ = $this->prepare(
+                sprintf(static::UPDATE_INST_STMT, $this->tableName_)
+            );
+        }
+
+        return $this->updateInstStmt_;
     }
 }

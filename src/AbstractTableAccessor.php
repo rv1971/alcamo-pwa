@@ -10,10 +10,10 @@ abstract class AbstractTableAccessor extends TableAccessorBase
 
     private $tablePrefix_; ///< ?string
 
-    private $getStmt_;    ///< Statement
-    private $addStmt_;    ///< Statement
-    private $modifyStmt_; ///< Statement
-    private $removeStmt_; ///< Statement
+    private $getStmt_;        ///< Statement
+    private $addStmt_;        ///< Statement
+    private $modifyStmt_;     ///< Statement
+    private $removeStmt_;     ///< Statement
 
     /**
      * @param $conf array or ArrayAccess object containing

@@ -138,7 +138,7 @@ class AccountMgr
          *  matches, use it. */
 
         if (isset($inst)) {
-            $instAccessor->modify($instId, $userAgent, $appVersion);
+            $instAccessor->updateInst($instId, $userAgent, $appVersion);
             return;
         }
 
