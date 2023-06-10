@@ -41,7 +41,6 @@ UPDATE %s SET
     user_agent = ?,
     app_version = ?,
     update_count = update_count + 1,
-    created = CURRENT_TIMESTAMP,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
 EOD;
