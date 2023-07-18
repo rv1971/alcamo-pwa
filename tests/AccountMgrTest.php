@@ -16,7 +16,8 @@ class AccountMgrTest extends TestCase
         [
             'username' => 'bob',
             'userAgent' => 'BlackBerry9900/5.1.0.692',
-            'appVersion' => '0.42.1'
+            'appVersion' => '0.42.1',
+            'launcher' => 'Homescreen'
         ],
         [
             'username' => 'alice',
@@ -141,7 +142,8 @@ class AccountMgrTest extends TestCase
                 $data->username,
                 $data->obfuscated,
                 $data->userAgent,
-                $data->appVersion
+                $data->appVersion,
+                $data->launcher ?? null
             );
 
             $this->assertSame(
@@ -164,6 +166,10 @@ class AccountMgrTest extends TestCase
 
             $this->assertSame($data->appVersion, $inst->getAppVersion());
 
+            if (isset($data->launcher)) {
+                $this->assertSame($data->launcher, $inst->getLauncher());
+            }
+
             $this->assertSame(0, $inst->getUpdateCount());
         }
 
@@ -172,12 +178,15 @@ class AccountMgrTest extends TestCase
 
         $appVersion = '1.1.0';
 
+        $launcher = 'SpecialLauncher';
+
         $this->mgr_->addOrModifyInst(
             $this->testData_[0]->instId,
             $this->testData_[0]->username,
             $this->testData_[0]->obfuscated,
             $userAgent1,
-            $appVersion
+            $appVersion,
+            $launcher
         );
 
         $this->assertSame(0, count($this->mgr_->getOpenInstAccessor()));
@@ -190,6 +199,8 @@ class AccountMgrTest extends TestCase
         $this->assertSame($userAgent1, $inst->getUserAgent());
 
         $this->assertSame($appVersion, $inst->getAppVersion());
+
+        $this->assertSame($launcher, $inst->getLauncher());
 
         $this->assertSame(1, $inst->getUpdateCount());
 

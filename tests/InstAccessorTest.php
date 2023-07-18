@@ -14,7 +14,8 @@ class InstAccessorTest extends TestCase
         [
             'username' => 'bob',
             'userAgent' => 'BlackBerry9900/5.1.0.692',
-            'appVersion' => '0.42.1'
+            'appVersion' => '0.42.1',
+            'launcher' => 'Homescreen'
         ],
         [
             'username' => 'alice',
@@ -82,7 +83,8 @@ class InstAccessorTest extends TestCase
                 $data->username,
                 $data->passwdHash,
                 $data->userAgent,
-                $data->appVersion
+                $data->appVersion,
+                $data->launcher ?? null
             );
 
             $this->testData_[$i] = $data;
@@ -103,6 +105,10 @@ class InstAccessorTest extends TestCase
             $this->assertSame($data->userAgent, $record->getUserAgent());
 
             $this->assertSame($data->appVersion, $record->getAppVersion());
+
+            if (isset($data->launcher)) {
+                $this->assertSame($data->launcher, $record->getLauncher());
+            }
 
             $this->assertSame(0, $record->getUpdateCount());
         }
@@ -186,11 +192,16 @@ class InstAccessorTest extends TestCase
     {
         $userAgent = 'BlackBerry9800/5.0.0.693';
 
-        $this->accessor_->modify($this->testData_[2]->instId, $userAgent);
+        $launcher = 'TestLauncher';
+
+        $this->accessor_
+            ->modify($this->testData_[2]->instId, $userAgent, $launcher);
 
         $inst = $this->accessor_->get($this->testData_[2]->instId);
 
         $this->assertSame($userAgent, $inst->getUserAgent());
+
+        $this->assertSame($launcher, $inst->getLauncher());
     }
 
     public function testUpdateInst()
@@ -199,10 +210,13 @@ class InstAccessorTest extends TestCase
 
         $appVersion = '0.43.2';
 
+        $launcher = 'TestLauncher2';
+
         $this->accessor_->updateInst(
             $this->testData_[2]->instId,
             $userAgent,
-            $appVersion
+            $appVersion,
+            $launcher
         );
 
         $inst = $this->accessor_->get($this->testData_[2]->instId);
@@ -212,6 +226,8 @@ class InstAccessorTest extends TestCase
         $this->assertSame($userAgent, $inst->getUserAgent());
 
         $this->assertSame($appVersion, $inst->getAppVersion());
+
+        $this->assertSame($launcher, $inst->getLauncher());
     }
 
     public function testRemove()

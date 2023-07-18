@@ -63,6 +63,11 @@ class Cli extends AbstractCli
                     'u',
                     GetOpt::REQUIRED_ARGUMENT,
                     'Filter for this user'
+                ],
+                'with-launcher' => [
+                    'w',
+                    GetOpt::NO_ARGUMENT,
+                    'Instances with nonemtpy launcher only'
                 ]
             ],
             [],
@@ -112,6 +117,7 @@ class Cli extends AbstractCli
         . "instance id: %s\n"
         . "user agent:  %s\n"
         . "app version: %s\n"
+        . "launcher:    %s\n"
         . "passwh hash: %s\n"
         . "created:     %s\n"
         . "modified:    %s\n\n";
@@ -241,6 +247,15 @@ class Cli extends AbstractCli
             $iterator = $this->getAccountMgr()->getInstAccessor();
         }
 
+        if ($this->getOption('with-launcher')) {
+            $iterator = new \CallbackFilterIterator(
+                $iterator,
+                function ($record) {
+                    return $record->getLauncher() !== null;
+                }
+            );
+        }
+
         echo "\n";
 
         if ($this->getOption('detail')) {
@@ -251,6 +266,7 @@ class Cli extends AbstractCli
                     $record->getInstId(),
                     $record->getUserAgent(),
                     $record->getAppVersion(),
+                    $record->getLauncher(),
                     $record->getPasswdHash(),
                     $record->getCreated()->format(static::TIMESTAMP_FMT),
                     $record->getModified()->format(static::TIMESTAMP_FMT)

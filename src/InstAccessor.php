@@ -30,17 +30,19 @@ INSERT INTO %s(
     passwd_hash,
     user_agent,
     app_version,
+    launcher,
     update_count,
     created,
     modified
 )
-VALUES(?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+VALUES(?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 EOD;
 
     /** `created = created` to work around auto-updating columns in mysql. */
     public const MODIFY_STMT = <<<EOD
 UPDATE %s SET
     user_agent = ?,
+    launcher = ?,
     created = created,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
@@ -53,6 +55,7 @@ EOD;
 UPDATE %s SET
     user_agent = ?,
     app_version = ?,
+    launcher = ?,
     update_count = update_count + 1,
     created = created,
     modified = CURRENT_TIMESTAMP
@@ -165,7 +168,8 @@ EOD;
         string $username,
         string $passwdHash,
         string $userAgent,
-        string $appVersion
+        string $appVersion,
+        ?string $launcher = null
     ): void {
         $this->getAddStmt()->execute(
             [
@@ -173,16 +177,20 @@ EOD;
                 $username,
                 $passwdHash,
                 $userAgent,
-                $appVersion
+                $appVersion,
+                $launcher
             ]
         );
     }
 
-    public function modify(string $instId, string $userAgent): void
-    {
+    public function modify(
+        string $instId,
+        string $userAgent,
+        ?string $launcher = null
+    ): void {
         $stmt = $this->getModifyStmt();
 
-        $stmt->execute([ $userAgent, $instId ]);
+        $stmt->execute([ $userAgent, $launcher, $instId ]);
 
         if (!$stmt->rowCount()) {
             throw (new DataNotFound())->setMessageContext(
@@ -197,11 +205,12 @@ EOD;
     public function updateInst(
         string $instId,
         string $userAgent,
-        string $appVersion
+        string $appVersion,
+        ?string $launcher = null
     ): void {
         $stmt = $this->getUpdateInstStmt();
 
-        $stmt->execute([ $userAgent, $appVersion, $instId ]);
+        $stmt->execute([ $userAgent, $appVersion, $launcher, $instId ]);
 
         if (!$stmt->rowCount()) {
             throw (new DataNotFound())->setMessageContext(

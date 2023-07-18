@@ -128,7 +128,8 @@ class AccountMgr
         string $username,
         string $obfuscated,
         string $userAgent,
-        string $appVersion
+        string $appVersion,
+        ?string $launcher = null
     ): void {
         $instAccessor = $this->instAccessor_;
 
@@ -138,7 +139,8 @@ class AccountMgr
          *  matches, use it. */
 
         if (isset($inst)) {
-            $instAccessor->updateInst($instId, $userAgent, $appVersion);
+            $instAccessor
+                ->updateInst($instId, $userAgent, $appVersion, $launcher);
             return;
         }
 
@@ -153,7 +155,8 @@ class AccountMgr
                 $username,
                 $openInst->getPasswdHash(),
                 $userAgent,
-                $appVersion
+                $appVersion,
+                $launcher
             );
 
             $this->openInstAccessor_->remove($openInst->getPasswdHash());
@@ -203,7 +206,8 @@ class AccountMgr
                 $username,
                 $inst->getPasswdHash(),
                 $inst->getUserAgent(),
-                $appVersion
+                $appVersion,
+                $launcher
             );
 
             return;

@@ -4,6 +4,7 @@ create table /*_*/inst(
   passwd_hash varchar(255) not null,
   user_agent varchar(255) not null,
   app_version varchar(32) not null,
+  launcher varchar(15),
   update_count integer not null,
   created timestamp not null,
   modified timestamp not null,

@@ -11,6 +11,7 @@ class InstRecord
     private $passwd_hash;
     private $user_agent;
     private $app_version;
+    private $launcher;
     private $update_count;
 
     public function __construct()
@@ -46,6 +47,11 @@ class InstRecord
     public function getAppVersion(): string
     {
         return $this->app_version;
+    }
+
+    public function getLauncher(): ?string
+    {
+        return $this->launcher;
     }
 
     public function getUpdateCount(): int
