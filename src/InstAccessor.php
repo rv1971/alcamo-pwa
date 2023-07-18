@@ -37,20 +37,24 @@ INSERT INTO %s(
 VALUES(?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 EOD;
 
+    /** `created = created` to work around auto-updating columns in mysql. */
     public const MODIFY_STMT = <<<EOD
 UPDATE %s SET
     user_agent = ?,
+    created = created,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
 EOD;
 
     public const REMOVE_STMT = "DELETE FROM %s WHERE inst_id = ?";
 
+    /** `created = created` to work around auto-updating columns in mysql. */
     public const UPDATE_INST_STMT = <<<EOD
 UPDATE %s SET
     user_agent = ?,
     app_version = ?,
     update_count = update_count + 1,
+    created = created,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
 EOD;
