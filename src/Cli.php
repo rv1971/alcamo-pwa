@@ -248,12 +248,15 @@ class Cli extends AbstractCli
         }
 
         if ($this->getOption('with-launcher')) {
-            $iterator = new \CallbackFilterIterator(
-                $iterator,
-                function ($record) {
-                    return $record->getLauncher() !== null;
+            $records = [];
+
+            foreach ($iterator as $record) {
+                if ($record->getLauncher() !== null) {
+                    $records[] = $record;
                 }
-            );
+            }
+
+            $iterator = new \ArrayIterator($records);
         }
 
         echo "\n";
