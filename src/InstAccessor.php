@@ -182,16 +182,9 @@ EOD;
 
                         $stmt->execute([ $instId, $record->getInstId() ]);
 
-                        if (!$stmt->rowCount()) {
-                            /** @throw alcamo::exception::DataNotFound if
-                             *  update failed. This should not happen. */
-                            throw (new DataNotFound())->setMessageContext(
-                                [
-                                    'inTable' => $this->tableName_,
-                                    'forKey' => [ $instId ]
-                                ]
-                            );
-                        }
+                        /* Do not check rowCount() since for some reason it
+                         * does not seem to work reliably with all postgres
+                         * drivers. */
 
                         /** Then return the record for the newly created
                          *  instance. */
