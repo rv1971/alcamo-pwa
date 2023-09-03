@@ -42,7 +42,8 @@ class InstAccessorTest extends TestCase
                 'connection' => $pdo,
                 'tablePrefix' => 'bar_',
             ],
-            'passwdKey' => random_bytes(8)
+            'passwdKey' => random_bytes(8),
+            'minReplaceableInstAge' => 'PT2S'
         ];
 
         $pdo->query('PRAGMA foreign_keys = ON');
@@ -228,6 +229,37 @@ class InstAccessorTest extends TestCase
         $this->assertSame($appVersion, $inst->getAppVersion());
 
         $this->assertSame($launcher, $inst->getLauncher());
+    }
+
+    public function testReplace()
+    {
+        $newInstId = 'feebaf';
+
+        $testData = $this->testData_[2];
+
+        $this->assertSame(
+            $testData->instId,
+            $this->accessor_->get(
+                $testData->instId,
+                'bob',
+                $testData->obfuscated
+            )->getInstId()
+        );
+
+        $this->assertNull(
+            $this->accessor_->get($newInstId, 'bob', $testData->obfuscated)
+        );
+
+        sleep(2);
+
+        $this->assertSame(
+            $newInstId,
+            $this->accessor_->get(
+                $newInstId,
+                'bob',
+                $testData->obfuscated
+            )->getInstId()
+        );
     }
 
     public function testRemove()

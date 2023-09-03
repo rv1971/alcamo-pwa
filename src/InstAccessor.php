@@ -4,6 +4,7 @@ namespace alcamo\pwa;
 
 use alcamo\dao\Statement;
 use alcamo\exception\DataNotFound;
+use alcamo\time\Duration;
 
 class InstAccessor extends AbstractTableAccessor
 {
@@ -48,6 +49,15 @@ UPDATE %s SET
 WHERE inst_id = ?
 EOD;
 
+    /** `created = created` to work around auto-updating columns in mysql. */
+    public const REPLACE_INST_STMT = <<<EOD
+UPDATE %s SET
+    inst_id = ?,
+    created = created,
+    modified = CURRENT_TIMESTAMP
+WHERE inst_id = ?
+EOD;
+
     public const REMOVE_STMT = "DELETE FROM %s WHERE inst_id = ?";
 
     /** `created = created` to work around auto-updating columns in mysql. */
@@ -62,8 +72,8 @@ UPDATE %s SET
 WHERE inst_id = ?
 EOD;
 
-    private $updateInstStmt_;    ///< Statement
-    private $passwdTransformer_; ///< PasswdTransformer
+    private $passwdTransformer_;     ///< PasswdTransformer
+    private $minReplaceableInstAge_; ///< ?Duration
 
     /**
      * @param $conf array or ArrayAccess object containing
@@ -71,6 +81,7 @@ EOD;
      *   - `connection`
      *   - `?string tablePrefix`
      * - `string passwdKey`
+     * - optional `string minReplaceableInstAge`
      */
     public static function newFromConf(
         iterable $conf
@@ -78,18 +89,24 @@ EOD;
         return new static(
             $conf['db']['connection'],
             $conf['db']['tablePrefix'] ?? null,
-            new PasswdTransformer($conf['passwdKey'])
+            new PasswdTransformer($conf['passwdKey']),
+            isset($conf['minReplaceableInstAge'])
+            ? new Duration($conf['minReplaceableInstAge'])
+            : null
         );
     }
 
     public function __construct(
         $connection,
         ?string $tablePrefix,
-        PasswdTransformer $passwdTransformer
+        PasswdTransformer $passwdTransformer,
+        ?Duration $minReplaceableInstAge
     ) {
         parent::__construct($connection, $tablePrefix);
 
         $this->passwdTransformer_ = $passwdTransformer;
+
+        $this->minReplaceableInstAge_ = $minReplaceableInstAge;
     }
 
     public function getPasswdTransformer(): PasswdTransformer
@@ -140,8 +157,57 @@ EOD;
             return $record;
         };
 
-        /** If no username is given and no record is found, return `null`
-         *  without throwing. */
+        /** If no record is found but username is given, and
+         *  minReplaceableInstAge is configured, look for a matching record of
+         *  a minimum age, and replace its instance ID. */
+        if (isset($username)) {
+            if (isset($this->minReplaceableInstAge_)) {
+                $maxTimestamp =
+                    (new \DateTime())->sub($this->minReplaceableInstAge_);
+
+                foreach ($this->getUserInsts($username) as $record) {
+                    if (
+                        $record->getCreated() < $maxTimestamp
+                        && $this->passwdTransformer_->verifyObfuscatedPasswd(
+                            $obfuscated,
+                            $record->getPasswdHash()
+                        )
+                    ) {
+                        $stmt = $this->prepare(
+                            sprintf(
+                                static::REPLACE_INST_STMT,
+                                $this->tableName_
+                            )
+                        );
+
+                        $stmt->execute([ $instId, $record->getInstId() ]);
+
+                        if (!$stmt->rowCount()) {
+                            /** @throw alcamo::exception::DataNotFound if
+                             *  update failed. This should not happen. */
+                            throw (new DataNotFound())->setMessageContext(
+                                [
+                                    'inTable' => $this->tableName_,
+                                    'forKey' => [ $instId ]
+                                ]
+                            );
+                        }
+
+                        /** Then return the record for the newly created
+                         *  instance. */
+                        foreach (
+                            $this->getGetStmt()
+                                ->executeAndReturnSelf([ $instId ]) as $record
+                        ) {
+                            return $record;
+                        }
+                    }
+                }
+            }
+        }
+
+        /** If no instance record is found nor created, return `null` without
+         *  throwing. */
         return null;
     }
 
@@ -208,7 +274,9 @@ EOD;
         string $appVersion,
         ?string $launcher = null
     ): void {
-        $stmt = $this->getUpdateInstStmt();
+        $stmt = $this->prepare(
+            sprintf(static::UPDATE_INST_STMT, $this->tableName_)
+        );
 
         $stmt->execute([ $userAgent, $appVersion, $launcher, $instId ]);
 
@@ -236,16 +304,5 @@ EOD;
                 ]
             );
         }
-    }
-
-    protected function getUpdateInstStmt(): Statement
-    {
-        if (!isset($this->updateInstStmt_)) {
-            $this->updateInstStmt_ = $this->prepare(
-                sprintf(static::UPDATE_INST_STMT, $this->tableName_)
-            );
-        }
-
-        return $this->updateInstStmt_;
     }
 }
