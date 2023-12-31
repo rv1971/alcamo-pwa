@@ -33,7 +33,7 @@ class CliTest extends TestCase
 
     public function testOptionJsonConfigFile(): void
     {
-        $this->cli_->process();
+        $this->cli_->run('');
 
         $this->assertSame(
             'smtp.example.info',
@@ -47,7 +47,7 @@ class CliTest extends TestCase
 
         $cli2 = new Cli($this->cli_->getConf());
 
-        $cli2->process(
+        $cli2->run(
             '-j ' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'etc'
             . DIRECTORY_SEPARATOR . 'config_example.json'
             . ' test-database'
@@ -71,11 +71,11 @@ class CliTest extends TestCase
         $conf = $this->cli_->getConf();
         $conf['db']['connection'] = $dbAccessor;
 
-        (new Cli($conf))->process('setup-database');
+        (new Cli($conf))->run('setup-database');
 
         $cli3 = new Cli($conf);
 
-        $cli3->process('add alice');
+        $cli3->run('add alice');
 
         foreach (
             $cli3->getAccountMgr()->getOpenInstAccessor() as $record
@@ -89,7 +89,7 @@ class CliTest extends TestCase
 
     public function testSetupDatabase(): void
     {
-        $this->cli_->process('setup-database');
+        $this->cli_->run('setup-database');
 
         $this->assertSame(
             0,

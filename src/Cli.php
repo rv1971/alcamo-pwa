@@ -167,10 +167,8 @@ class Cli extends AbstractCli
         return $this->mailer_;
     }
 
-    public function process($arguments = null): int
+    public function innerRun(): int
     {
-        parent::process($arguments);
-
         if (!$this->getCommand()) {
             $this->showHelp();
             return 0;

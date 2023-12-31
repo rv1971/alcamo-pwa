@@ -5,4 +5,4 @@ namespace alcamo\pwa;
 
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
-(new Cli([]))->process();
+exit((new Cli([]))->run());
