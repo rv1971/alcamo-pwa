@@ -12,7 +12,8 @@ class Cli extends AbstractCli
             'json-config-file' => [
                 'j',
                 GetOpt::REQUIRED_ARGUMENT,
-                'Read conf from this JSON file'
+                'Read conf from this JSON file',
+                'filename'
             ]
         ]
         + parent::OPTIONS;
@@ -62,7 +63,8 @@ class Cli extends AbstractCli
                 'username' => [
                     'u',
                     GetOpt::REQUIRED_ARGUMENT,
-                    'Filter for this user'
+                    'Filter for this user',
+                    'username'
                 ],
                 'with-launcher' => [
                     'w',
