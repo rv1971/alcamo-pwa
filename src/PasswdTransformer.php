@@ -15,7 +15,7 @@ class PasswdTransformer
 
     public function createPasswd(): string
     {
-        return random_bytes(static::PASSWD_LENGTH);
+        return strtr(random_bytes(static::PASSWD_LENGTH), "\x00", "\x01");
     }
 
     public function obfuscate(string $passwd): string
