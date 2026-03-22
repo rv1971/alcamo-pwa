@@ -12,7 +12,7 @@ class Cli extends AbstractCli
             'json-config-file' => [
                 'j',
                 GetOpt::REQUIRED_ARGUMENT,
-                'Read conf from this JSON file',
+                'Read conf from this JSON file.',
                 'filename'
             ]
         ]
@@ -25,17 +25,17 @@ class Cli extends AbstractCli
                 'no-mail' => [
                     null,
                     self::NO_ARGUMENT,
-                    'Do not send a mail to the user'
+                    'Do not send a mail to the user.'
                 ]
             ],
             [ 'username' => Operand::REQUIRED ],
-            'Add an open installation for a user'
+            'Add an open installation for a user.'
         ],
         'list-accounts' => [
             'listAccounts',
             [],
             [],
-            'List accounts'
+            'List accounts.'
         ],
         'list-insts' => [
             'listInsts',
@@ -43,61 +43,61 @@ class Cli extends AbstractCli
                 'detail' => [
                     null,
                     GetOpt::NO_ARGUMENT,
-                    'Details with one property per line'
+                    'Details with one property per line.'
                 ],
                 'app-version-detail' => [
                     null,
                     GetOpt::NO_ARGUMENT,
-                    'Detailed app version'
+                    'Detailed app version.'
                 ],
                 'timestamp-detail' => [
                     null,
                     GetOpt::NO_ARGUMENT,
-                    'Detailed timestamp'
+                    'Detailed timestamp.'
                 ],
                 'user-agent-detail' => [
                     null,
                     GetOpt::NO_ARGUMENT,
-                    'Detailed user agent'
+                    'Detailed user agent.'
                 ],
                 'username' => [
                     'u',
                     GetOpt::REQUIRED_ARGUMENT,
-                    'Filter for this user',
+                    'Filter for this user.',
                     'username'
                 ],
                 'with-launcher' => [
                     'w',
                     GetOpt::NO_ARGUMENT,
-                    'Instances with nonemtpy launcher only'
+                    'Instances with nonemtpy launcher only.'
                 ]
             ],
             [],
-            'List installations'
+            'List installations.'
         ],
         'list-open-insts' => [
             'listOpenInsts',
             [],
             [],
-            'List open installations'
+            'List open installations.'
         ],
         'setup-database' => [
             'setupDatabase',
             [],
             [],
-            'Setup the database'
+            'Setup the database.'
         ],
         'test-database' => [
             'testDatabase',
             [],
             [],
-            'Test whether database is accessible'
+            'Test whether the database is accessible.'
         ],
         'test-smtp' => [
             'testSmtp',
             [],
             [ 'to' => Operand::REQUIRED ],
-            'Test the SMTP server'
+            'Test the SMTP server.'
         ],
         'verify-passwd' => [
             'verifyPasswd',
@@ -106,7 +106,7 @@ class Cli extends AbstractCli
                 'obfuscated' => Operand::REQUIRED,
                 'passwdHash' => Operand::REQUIRED
             ],
-            'Verify obfuscated password against hash'
+            'Verify obfuscated password against hash.'
         ]
     ];
 
