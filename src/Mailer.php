@@ -44,6 +44,7 @@ EOD;
         return new self(
             $conf['host'],
             $conf['port'],
+            $conf['encryption'],
             $conf['username'],
             $conf['passwd'],
             $conf['from'],
@@ -54,6 +55,7 @@ EOD;
     public function __construct(
         string $host,
         string $port,
+        string $encryption,
         string $username,
         string $passwd,
         string $from,
@@ -68,7 +70,7 @@ EOD;
         $this->isSMTP();
         $this->Host = $host;
         $this->Port = $port;
-        $this->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $this->SMTPSecure = $encryption;
         $this->SMTPAuth = true;
         $this->Username = $username;
         $this->Password = $passwd;

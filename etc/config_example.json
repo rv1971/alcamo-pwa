@@ -10,6 +10,7 @@
     "smtp": {
         "host": "smtp.example.com",
         "port": 587,
+        "encryption": "tls",
         "username": "alice",
         "passwd": "passw$1234",
         "from": "alice@example.com"

@@ -23,6 +23,7 @@ class CliTest extends TestCase
                 'smtp' => [
                     'host' => 'smtp.example.info',
                     'port' => 587,
+                    'encryption' => 'tls',
                     'username' => 'bob',
                     'passwd' => 'passw$1234',
                     'from' => 'bob@example.info'
