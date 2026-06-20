@@ -21,7 +21,7 @@ class OpenInstAccessorTest extends TestCase
                 'tablePrefix' => 'foo_'
             ],
             'passwdKey' => random_bytes(8),
-            'maxOpenInstAge' => 'PT4S'
+            'maxOpenInstAge' => 'PT5S'
         ];
 
         $pdo->query('PRAGMA foreign_keys = ON');
@@ -63,9 +63,13 @@ class OpenInstAccessorTest extends TestCase
 
     public function testAdd()
     {
+#        echo "*** A " . (new \DateTime())->format('H:i:s') . "\n";
+
         $alice1Obfuscated = $this->accessor_->add('alice');
 
-        sleep(2);
+        sleep(3);
+
+#        echo "*** B " . (new \DateTime())->format('H:i:s') . "\n";
 
         $alice2Obfuscated = $this->accessor_->add('alice');
 
@@ -101,7 +105,24 @@ class OpenInstAccessorTest extends TestCase
             )
         );
 
-        sleep(3);
+        $this->assertInstanceOf(
+            OpenInstRecord::class,
+            $this->accessor_->get('alice', $alice2Obfuscated)
+        );
+
+#        echo "*** C " . (new \DateTime())->format('H:i:s') . "\n";
+
+        sleep(2);
+
+#        echo "*** D " . (new \DateTime())->format('H:i:s') . "\n";
+
+        // alice 2 is still there
+        $this->assertInstanceOf(
+            OpenInstRecord::class,
+            $this->accessor_->get('alice', $alice2Obfuscated)
+        );
+
+#        echo "*** E " . (new \DateTime())->format('H:i:s') . "\n";
 
         // alice 1 is expired now
         $this->assertNull($this->accessor_->get('alice', $alice1Obfuscated));
@@ -109,12 +130,6 @@ class OpenInstAccessorTest extends TestCase
         // unlike the previous invocation, this tests the case that no
         // record is found in the table
         $this->assertNull($this->accessor_->get('alice', $alice1Obfuscated));
-
-        // alice 2 is still there
-        $this->assertInstanceOf(
-            OpenInstRecord::class,
-            $this->accessor_->get('alice', $alice2Obfuscated)
-        );
 
         sleep(2);
 

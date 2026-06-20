@@ -15,7 +15,9 @@ class CliTest extends TestCase
     {
         $this->cli_ = new Cli(
             [
-                'db' => [ 'connection' => static::DSN ],
+                'db' => [
+                    'connection' => static::DSN
+                ],
                 'passwdKey' => random_bytes(8),
                 'maxOpenInstAge' => 'PT4S',
                 'maxPrevInstAge' => 'PT5S',

@@ -39,7 +39,7 @@ EOD;
      * - `from`
      * - `?bool debug`
      */
-    public function newFromConf(iterable $conf): self
+    public static function newFromConf(iterable $conf): self
     {
         return new self(
             $conf['host'],

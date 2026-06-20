@@ -16,7 +16,7 @@ class Cli extends AbstractCli
                 'filename'
             ]
         ]
-        + parent::OPTIONS;
+    + parent::OPTIONS;
 
     public const COMMANDS = [
         'add' => [
@@ -191,20 +191,23 @@ class Cli extends AbstractCli
 
         $this->mailer_ = Mailer::newFromConf($this->conf_['smtp']);
 
-        return $this->{$this->getCommand()->getHandler()}();
+        return 0;
     }
 
     public function addOpenInst(): int
     {
-        $obfuscated = $this->accountMgr_->addOpenInst(
-            $this->getOperand('username')
-        );
+        $username = $this->getOperand('username');
+
+        $obfuscated = $this->accountMgr_->addOpenInst($username);
 
         if (!$this->getOption('no-mail')) {
-            $this->mailOpenInst($this->getOperand('username'), $obfuscated);
+            $this->mailOpenInst($username, $obfuscated);
         }
 
-        $this->reportOpenInst($this->getOperand('username'), $obfuscated);
+        $this->getLogger()->notice(
+            "Created new open instance at "
+            . $this->createUrl($username, $obfuscated)
+        );
 
         return 0;
     }
@@ -424,13 +427,6 @@ class Cli extends AbstractCli
         return 0;
     }
 
-    public function reportOpenInst(string $username, string $obfuscated): void
-    {
-        $this->reportProgress(
-            "Created new open instance at {$this->createUrl($username, $obfuscated)}"
-        );
-    }
-
     public function mailOpenInst(string $username, string $obfuscated): void
     {
         /** To be implemented in derived class. */
@@ -471,10 +467,10 @@ class Cli extends AbstractCli
                     $this->getOperand('passwdHash')
                 )
         ) {
-            $this->reportProgress("Password OK");
+            $this->getLogger()->notice("Password OK");
             return 0;
         } else {
-            $this->reportProgress("Password does not match");
+            $this->getLogger()->notice("Password does not match");
             return 1;
         }
     }
