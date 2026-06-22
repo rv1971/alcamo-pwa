@@ -2,9 +2,9 @@
 
 namespace alcamo\pwa;
 
-use alcamo\dao\{Statement, TableAccessor as TableAccessorBase};
+use alcamo\dao\{Statement, TableAccessor as BaseTableAccessor};
 
-abstract class AbstractTableAccessor extends TableAccessorBase
+abstract class AbstractTableAccessor extends BaseTableAccessor
 {
     public const SELECT_STMT = 'SELECT * FROM %s ORDER BY 1, 2, 3 LIMIT 1000';
 
