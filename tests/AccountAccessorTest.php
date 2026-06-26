@@ -18,10 +18,7 @@ class AccountAccessorTest extends TestCase
 
         (new Installer($dbAccessor))->install();
 
-        $this->accessor_ = AccountAccessor::newFromDbAccessorAndConf(
-            $dbAccessor,
-            null
-        );
+        $this->accessor_ = new AccountAccessor($dbAccessor);
     }
 
     public function testAdd()

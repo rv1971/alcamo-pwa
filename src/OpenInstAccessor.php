@@ -35,27 +35,6 @@ class OpenInstAccessor extends RelationAccessor
     private $passwdTransformer_; ///< PasswdTransformer
     private $maxAge_;            ///< Duration
 
-    /**
-     * @param $props array|object Properties containing
-     * - `db`
-     *   - `dsn`
-     *   - `?string namePrefix`
-     * - `string passwdKey`
-     * - `string maxOpenInstAge`
-     */
-    public static function newFromDbAccessorAndConf(
-        DbAccessor $dbAccessor,
-        $conf
-    ): RelationAccessor {
-        $conf = (object)$conf;
-
-        return new static(
-            $dbAccessor,
-            new PasswdTransformer($conf->passwdKey),
-            new Duration($conf->maxOpenInstAge)
-        );
-    }
-
     public function __construct(
         DbAccessor $dbAccessor,
         PasswdTransformer $passwdTransformer,

@@ -4,6 +4,7 @@ namespace alcamo\pwa;
 
 use alcamo\dao\DbAccessor;
 use alcamo\exception\DataNotFound;
+use alcamo\time\Duration;
 use PHPUnit\Framework\TestCase;
 use Symfony\Polyfill\Uuid\Uuid;
 
@@ -44,18 +45,13 @@ class InstAccessorTest extends TestCase
 
         (new Installer($dbAccessor))->install();
 
-        $this->accessor_ = InstAccessor::newFromDbAccessorAndConf(
+        $this->accessor_ = new InstAccessor(
             $dbAccessor,
-            [
-                'passwdKey' => random_bytes(8),
-                'minReplaceableInstAge' => 'PT2S'
-            ]
+            new PasswdTransformer(random_bytes(8)),
+            new Duration('PT2S')
         );
 
-        $accountAccessor_ = AccountAccessor::newFromDbAccessorAndConf(
-            $dbAccessor,
-            null
-        );
+        $accountAccessor_ = new AccountAccessor($dbAccessor);
 
         foreach (static::TEST_DATA as $i => $data) {
             if ($i) {

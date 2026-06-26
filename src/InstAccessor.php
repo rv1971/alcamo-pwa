@@ -78,29 +78,6 @@ EOD
     private $passwdTransformer_;     ///< PasswdTransformer
     private $minReplaceableInstAge_; ///< ?Duration
 
-    /**
-     * @param $props array|object Properties containing
-     * - `db`
-     *   - `dsn`
-     *   - `?string namePrefix`
-     * - `string passwdKey`
-     * - optional `string minReplaceableInstAge`
-     */
-    public static function newFromDbAccessorAndConf(
-        DbAccessor $dbAccessor,
-        $conf
-    ): RelationAccessor {
-        $conf = (object)$conf;
-
-        return new static(
-            $dbAccessor,
-            new PasswdTransformer($conf->passwdKey),
-            isset($conf->minReplaceableInstAge)
-            ? new Duration($conf->minReplaceableInstAge)
-            : null
-        );
-    }
-
     public function __construct(
         DbAccessor $dbAccessor,
         PasswdTransformer $passwdTransformer,

@@ -2,7 +2,7 @@
 
 namespace alcamo\pwa;
 
-use alcamo\dao\{DbAccessor, RelationAccessor};
+use alcamo\dao\RelationAccessor;
 use alcamo\exception\DataNotFound;
 
 class AccountAccessor extends RelationAccessor
@@ -20,19 +20,6 @@ class AccountAccessor extends RelationAccessor
         'remove' => [ 'DELETE FROM /*_*/%s WHERE username = ?' ]
     ]
     + parent::STMT_MAP;
-
-    /**
-     * @param $props array|object Properties containing
-     * - `db`
-     *   - `dsn`
-     *   - `?string namePrefix`
-     */
-    public static function newFromDbAccessorAndConf(
-        DbAccessor $dbAccessor,
-        $conf
-    ): RelationAccessor {
-        return new static($dbAccessor);
-    }
 
     public function get($username): ?AccountRecord
     {

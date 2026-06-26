@@ -29,10 +29,22 @@ class AccountMgr
 
         $dbAccessor = DbAccessor::newFromProps($conf->db);
 
+        $passwdTransformer = new PasswdTransformer($conf->passwdKey);
+
         return new static(
-            AccountAccessor::newFromDbAccessorAndConf($dbAccessor, $conf),
-            OpenInstAccessor::newFromDbAccessorAndConf($dbAccessor, $conf),
-            InstAccessor::newFromDbAccessorAndConf($dbAccessor, $conf),
+            new AccountAccessor($dbAccessor),
+            new OpenInstAccessor(
+                $dbAccessor,
+                $passwdTransformer,
+                new Duration($conf->maxOpenInstAge)
+            ),
+            new InstAccessor(
+                $dbAccessor,
+                $passwdTransformer,
+                isset($conf->minReplaceableInstAge)
+                    ? new Duration($conf->minReplaceableInstAge)
+                    : null
+            ),
             new Duration($conf->maxPrevInstAge)
         );
     }
