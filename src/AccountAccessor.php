@@ -5,19 +5,21 @@ namespace alcamo\pwa;
 use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 
-class AccountAccessor extends AbstractTableAccessor
+class AccountAccessor extends RelationAccessor
 {
     public const RELATION_NAME = 'account';
 
     public const FETCH_CLASS = AccountRecord::class;
 
-    public const GET_STMT = "SELECT * FROM /*_*/%s WHERE username = ?";
-
-    public const ADD_STMT =
-        "INSERT INTO /*_*/%s(username, created, modified)\n"
-        . "  VALUES(?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
-
-    public const REMOVE_STMT = "DELETE FROM /*_*/%s WHERE username = ?";
+    public const STMT_MAP = [
+        'add'    => [
+            'INSERT INTO /*_*/%s(username, created, modified) '
+                . 'VALUES(?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
+        ],
+        'get'    => [ 'SELECT * FROM /*_*/%s WHERE username = ?' ],
+        'remove' => [ 'DELETE FROM /*_*/%s WHERE username = ?' ]
+    ]
+    + parent::STMT_MAP;
 
     /**
      * @param $props array|object Properties containing
@@ -35,7 +37,8 @@ class AccountAccessor extends AbstractTableAccessor
     public function get($username): ?AccountRecord
     {
         foreach (
-            $this->getGetStmt()->executeAndReturnSelf([ $username ]) as $record
+            $this->getStmt('get')
+                ->executeAndReturnSelf([ $username ]) as $record
         ) {
             return $record;
         }
@@ -45,14 +48,12 @@ class AccountAccessor extends AbstractTableAccessor
 
     public function add($username): void
     {
-        $this->getAddStmt()->execute([ $username ]);
+        $this->getStmt('add')->execute([ $username ]);
     }
 
     public function remove($username): void
     {
-        $stmt = $this->getRemoveStmt();
-
-        $stmt->execute([ $username ]);
+        $stmt = $this->getStmt('remove')->executeAndReturnSelf([ $username ]);
 
         if (!$stmt->rowCount()) {
             /** @throw alcamo::exception::DataNotFound if $username does not

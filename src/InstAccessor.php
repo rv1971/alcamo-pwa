@@ -6,25 +6,14 @@ use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
-class InstAccessor extends AbstractTableAccessor
+class InstAccessor extends RelationAccessor
 {
     public const RELATION_NAME = 'inst';
 
     public const FETCH_CLASS = InstRecord::class;
 
-    public const SELECT_STMT =
-        'SELECT * FROM /*_*/%s ORDER BY username, modified DESC LIMIT 1000';
-
-    public const GET_STMT = 'SELECT * FROM /*_*/%s WHERE inst_id = ?';
-
-    public const GET_USER_INSTS_STMT =
-        'SELECT * FROM /*_*/%s WHERE username = ? ORDER BY modified';
-
-    public const GET_USER_USER_AGENT_INSTS_STMT =
-        'SELECT * FROM /*_*/%s WHERE username = ? and user_agent = ? '
-        . 'ORDER BY modified';
-
-    public const ADD_STMT = <<<EOD
+    public const STMT_MAP = [
+        'add' => [ <<<EOD
 INSERT INTO /*_*/%s(
     inst_id,
     username,
@@ -37,31 +26,42 @@ INSERT INTO /*_*/%s(
     modified
 )
 VALUES(?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-EOD;
-
-    /** `created = created` to work around auto-updating columns in mysql. */
-    public const MODIFY_STMT = <<<EOD
+EOD
+        ],
+        'get' => [
+            'SELECT * FROM /*_*/%s WHERE inst_id = ?'
+        ],
+        'get-by-user' => [
+            'SELECT * FROM /*_*/%s WHERE username = ? ORDER BY modified'
+        ],
+        'get-by-user-user-agent' => [
+            'SELECT * FROM /*_*/%s WHERE username = ? and user_agent = ? '
+                . 'ORDER BY modified'
+        ],
+        'modify' => [ <<<EOD
 UPDATE /*_*/%s SET
     user_agent = ?,
     launcher = ?,
     created = created,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
-EOD;
-
-    /** `created = created` to work around auto-updating columns in mysql. */
-    public const REPLACE_INST_STMT = <<<EOD
+EOD
+        ],
+        'remove' => [
+            'DELETE FROM /*_*/%s WHERE inst_id = ?'
+        ],
+        'replace-inst' => [ <<<EOD
 UPDATE /*_*/%s SET
     inst_id = ?,
     created = created,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
-EOD;
-
-    public const REMOVE_STMT = "DELETE FROM /*_*/%s WHERE inst_id = ?";
-
-    /** `created = created` to work around auto-updating columns in mysql. */
-    public const UPDATE_INST_STMT = <<<EOD
+EOD
+        ],
+        'select' => [
+            'SELECT * FROM /*_*/%s ORDER BY username, modified DESC LIMIT 1000'
+        ],
+        'update-inst' => [ <<<EOD
 UPDATE /*_*/%s SET
     user_agent = ?,
     app_version = ?,
@@ -70,7 +70,10 @@ UPDATE /*_*/%s SET
     created = created,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
-EOD;
+EOD
+        ]
+    ]
+    + parent::STMT_MAP;
 
     private $passwdTransformer_;     ///< PasswdTransformer
     private $minReplaceableInstAge_; ///< ?Duration
@@ -121,8 +124,7 @@ EOD;
     ): ?InstRecord {
         // loop finds at most one record
         foreach (
-            $this->getGetStmt()
-                ->executeAndReturnSelf([ $instId ]) as $record
+            $this->getStmt('get')->executeAndReturnSelf([ $instId ]) as $record
         ) {
             /** Verify user and password if username is given. */
             if (isset($username)) {
@@ -173,14 +175,8 @@ EOD;
                             $record->getPasswdHash()
                         )
                     ) {
-                        $stmt = $this->prepare(
-                            sprintf(
-                                static::REPLACE_INST_STMT,
-                                $this->relationName_
-                            )
-                        );
-
-                        $stmt->execute([ $instId, $record->getInstId() ]);
+                        $this->getStmt('replace-inst')
+                            ->execute([ $instId, $record->getInstId() ]);
 
                         /* Do not check rowCount() since for some reason it
                          * does not seem to work reliably with all postgres
@@ -189,7 +185,7 @@ EOD;
                         /** Then return the record for the newly created
                          *  instance. */
                         foreach (
-                            $this->getGetStmt()
+                            $this->getStmt('get')
                                 ->executeAndReturnSelf([ $instId ]) as $record
                         ) {
                             return $record;
@@ -206,8 +202,7 @@ EOD;
 
     public function getUserInsts(string $username): \Traversable
     {
-        return $this->query(
-            sprintf(static::GET_USER_INSTS_STMT, $this->relationName_),
+        return $this->getStmt('get-by-user')->executeAndReturnSelf(
             [ $username ]
         );
     }
@@ -216,8 +211,7 @@ EOD;
         string $username,
         string $userAgent
     ): \Traversable {
-        return $this->query(
-            sprintf(static::GET_USER_USER_AGENT_INSTS_STMT, $this->relationName_),
+        return $this->getStmt('get-by-user-user-agent')->executeAndReturnSelf(
             [ $username, $userAgent ]
         );
     }
@@ -230,7 +224,7 @@ EOD;
         string $appVersion,
         ?string $launcher = null
     ): void {
-        $this->getAddStmt()->execute(
+        $this->getStmt('add')->execute(
             [
                 $instId,
                 $username,
@@ -247,9 +241,9 @@ EOD;
         string $userAgent,
         ?string $launcher = null
     ): void {
-        $stmt = $this->getModifyStmt();
-
-        $stmt->execute([ $userAgent, $launcher, $instId ]);
+        $stmt = $this->getStmt('modify')->executeAndReturnSelf(
+            [ $userAgent, $launcher, $instId ]
+        );
 
         if (!$stmt->rowCount()) {
             throw (new DataNotFound())->setMessageContext(
@@ -267,11 +261,9 @@ EOD;
         string $appVersion,
         ?string $launcher = null
     ): void {
-        $stmt = $this->prepare(
-            sprintf(static::UPDATE_INST_STMT, $this->relationName_)
+        $stmt = $this->getStmt('update-inst')->executeAndReturnSelf(
+            [ $userAgent, $appVersion, $launcher, $instId ]
         );
-
-        $stmt->execute([ $userAgent, $appVersion, $launcher, $instId ]);
 
         if (!$stmt->rowCount()) {
             throw (new DataNotFound())->setMessageContext(
@@ -285,9 +277,7 @@ EOD;
 
     public function remove($instId): void
     {
-        $stmt = $this->getRemoveStmt();
-
-        $stmt->execute([ $instId ]);
+        $stmt = $this->getStmt('remove')->executeAndReturnSelf([ $instId ]);
 
         if (!$stmt->rowCount()) {
             throw (new DataNotFound())->setMessageContext(

@@ -6,25 +6,31 @@ use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
-class OpenInstAccessor extends AbstractTableAccessor
+class OpenInstAccessor extends RelationAccessor
 {
     public const RELATION_NAME = 'open_inst';
 
     public const FETCH_CLASS = OpenInstRecord::class;
 
-    public const SELECT_STMT =
-        'SELECT * FROM /*_*/%s ORDER BY username, created LIMIT 1000';
-
-    public const GET_STMT = "SELECT * FROM /*_*/%s WHERE username = ?";
-
-    public const GET_USER_INSTS_STMT =
-        "SELECT * FROM /*_*/%s WHERE username = ? order by created";
-
-    public const ADD_STMT =
-        "INSERT INTO /*_*/%s(passwd_hash, username, created)\n"
-        . "  VALUES(?, ?, CURRENT_TIMESTAMP)";
-
-    public const REMOVE_STMT = "DELETE FROM /*_*/%s WHERE passwd_hash = ?";
+    public const STMT_MAP = [
+        'add' => [
+            'INSERT INTO /*_*/%s(passwd_hash, username, created) '
+                . 'VALUES(?, ?, CURRENT_TIMESTAMP)'
+        ],
+        'get' => [
+            'SELECT * FROM /*_*/%s WHERE username = ?'
+        ],
+        'get-user-insts' => [
+            'SELECT * FROM /*_*/%s WHERE username = ? order by created'
+        ],
+        'remove' => [
+            'DELETE FROM /*_*/%s WHERE passwd_hash = ?'
+        ],
+        'select' => [
+            'SELECT * FROM /*_*/%s ORDER BY username, created LIMIT 1000'
+        ]
+    ]
+    + parent::STMT_MAP;
 
     private $passwdTransformer_; ///< PasswdTransformer
     private $maxAge_;            ///< Duration
@@ -74,7 +80,8 @@ class OpenInstAccessor extends AbstractTableAccessor
     public function get(string $username, string $obfuscated): ?OpenInstRecord
     {
         foreach (
-            $this->getGetStmt()->executeAndReturnSelf([ $username ]) as $record
+            $this->getStmt('get')
+                ->executeAndReturnSelf([ $username ]) as $record
         ) {
             if (
                 $this->passwdTransformer_->verifyObfuscatedPasswd(
@@ -99,8 +106,7 @@ class OpenInstAccessor extends AbstractTableAccessor
 
     public function getUserInsts(string $username): \Traversable
     {
-        return $this->query(
-            sprintf(static::GET_USER_INSTS_STMT, $this->relationName_),
+        return $this->getStmt('get-user-insts')->executeAndReturnSelf(
             [ $username ]
         );
     }
@@ -110,7 +116,7 @@ class OpenInstAccessor extends AbstractTableAccessor
     {
         $passwd = $this->passwdTransformer_->createPasswd();
 
-        $this->getAddStmt()->execute(
+        $this->getStmt('add')->execute(
             [ $this->passwdTransformer_->createHash($passwd), $username ]
         );
 
@@ -119,9 +125,7 @@ class OpenInstAccessor extends AbstractTableAccessor
 
     public function remove($passwdHash): void
     {
-        $stmt = $this->getRemoveStmt();
-
-        $stmt->execute([ $passwdHash ]);
+        $stmt = $this->getStmt('remove')->executeAndReturnSelf([ $passwdHash ]);
 
         if (!$stmt->rowCount()) {
             /** @throw alcamo::exception::DataNotFound if $passwdHash does not
