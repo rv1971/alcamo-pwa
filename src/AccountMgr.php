@@ -2,7 +2,7 @@
 
 namespace alcamo\pwa;
 
-use alcamo\dao\{DbAccessor, RelationAccessor};
+use alcamo\dao\DbAccessor;
 use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
@@ -22,6 +22,7 @@ class AccountMgr
      * - `string passwdKey`
      * - `string maxOpenInstAge`
      * - `string maxPrevInstAge`
+     * - `?string minReplaceableInstAge`
      */
     public static function newFromConf($conf): self
     {

@@ -6,6 +6,11 @@ use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
+/**
+ * @brief Accessor for the open_inst table
+ *
+ * @date last reviewed 2026-06-26
+ */
 class InstAccessor extends RelationAccessor
 {
     public const RELATION_NAME = 'inst';
@@ -92,6 +97,11 @@ EOD
     public function getPasswdTransformer(): PasswdTransformer
     {
         return $this->passwdTransformer_;
+    }
+
+    public function getMinReplaceableInstAge(): ?Duration
+    {
+        return $this->minReplaceableInstAge_;
     }
 
     public function get(

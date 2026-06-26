@@ -5,6 +5,11 @@ namespace alcamo\pwa;
 use alcamo\dao\RelationAccessor;
 use alcamo\exception\DataNotFound;
 
+/**
+ * @brief Accessor for the account table
+ *
+ * @date last reviewed 2026-06-26
+ */
 class AccountAccessor extends RelationAccessor
 {
     public const RELATION_NAME = 'account';
@@ -21,6 +26,7 @@ class AccountAccessor extends RelationAccessor
     ]
     + parent::STMT_MAP;
 
+    /// Get one account record
     public function get($username): ?AccountRecord
     {
         foreach (

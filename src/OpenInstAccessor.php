@@ -6,6 +6,11 @@ use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
+/**
+ * @brief Accessor for the open_inst table
+ *
+ * @date last reviewed 2026-06-26
+ */
 class OpenInstAccessor extends RelationAccessor
 {
     public const RELATION_NAME = 'open_inst';
@@ -18,9 +23,6 @@ class OpenInstAccessor extends RelationAccessor
                 . 'VALUES(?, ?, CURRENT_TIMESTAMP)'
         ],
         'get' => [
-            'SELECT * FROM /*_*/%s WHERE username = ?'
-        ],
-        'get-user-insts' => [
             'SELECT * FROM /*_*/%s WHERE username = ? order by created'
         ],
         'remove' => [
@@ -51,17 +53,27 @@ class OpenInstAccessor extends RelationAccessor
         return $this->passwdTransformer_;
     }
 
+    public function getMaxAge(): Duration
+    {
+        return $this->maxAge_;
+    }
+
+    /// Get all records for a user
+    public function getUserInsts(string $username): \Traversable
+    {
+        return $this->getStmt('get')->executeAndReturnSelf(
+            [ $username ]
+        );
+    }
+
     /**
-     * @brief Get record, if present and not expired
+     * @brief Get one instance record, if present and not expired
      *
      * Remove any expired records.
      */
     public function get(string $username, string $obfuscated): ?OpenInstRecord
     {
-        foreach (
-            $this->getStmt('get')
-                ->executeAndReturnSelf([ $username ]) as $record
-        ) {
+        foreach ($this->getUserInsts($username) as $record) {
             if (
                 $this->passwdTransformer_->verifyObfuscatedPasswd(
                     $obfuscated,
@@ -73,7 +85,7 @@ class OpenInstAccessor extends RelationAccessor
                     < (new \DateTimeImmutable())->getTimestamp()
                 ) {
                     $this->remove($record->getPasswdHash());
-                    $record = null;
+                    return null;
                 }
 
                 return $record;
@@ -81,13 +93,6 @@ class OpenInstAccessor extends RelationAccessor
         }
 
         return null;
-    }
-
-    public function getUserInsts(string $username): \Traversable
-    {
-        return $this->getStmt('get-user-insts')->executeAndReturnSelf(
-            [ $username ]
-        );
     }
 
     /// @return obfuscated password
