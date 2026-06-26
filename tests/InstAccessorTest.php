@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\dao\DbAccessor;
 use alcamo\exception\DataNotFound;
 use PHPUnit\Framework\TestCase;
 use Symfony\Polyfill\Uuid\Uuid;
@@ -35,26 +36,26 @@ class InstAccessorTest extends TestCase
 
     public function setUp(): void
     {
-        $pdo = new \PDO(static::DSN);
+        $dbAccessor = DbAccessor::newFromProps(
+            [ 'dsn' => static::DSN, 'namePrefix' => 'bar_' ]
+        );
 
-        $conf = [
-            'db' => [
-                'connection' => $pdo,
-                'tablePrefix' => 'bar_',
-            ],
-            'passwdKey' => random_bytes(8),
-            'minReplaceableInstAge' => 'PT2S'
-        ];
+        $dbAccessor->executeScript('PRAGMA foreign_keys = ON');
 
-        $pdo->query('PRAGMA foreign_keys = ON');
+        (new Installer($dbAccessor))->install();
 
-        $this->accessor_ = InstAccessor::newFromConf($conf);
+        $this->accessor_ = InstAccessor::newFromDbAccessorAndConf(
+            $dbAccessor,
+            [
+                'passwdKey' => random_bytes(8),
+                'minReplaceableInstAge' => 'PT2S'
+            ]
+        );
 
-        $accountAccessor_ = AccountAccessor::newFromConf($conf);
-
-        $accountAccessor_->createTable();
-
-        $this->accessor_->createTable();
+        $accountAccessor_ = AccountAccessor::newFromDbAccessorAndConf(
+            $dbAccessor,
+            null
+        );
 
         foreach (static::TEST_DATA as $i => $data) {
             if ($i) {
@@ -136,7 +137,7 @@ class InstAccessorTest extends TestCase
         $this->expectException(DataNotFound::class);
 
         $this->expectExceptionMessage(
-            'Data not found in table "bar_inst" for key ["'
+            'Data not found in table "inst" for key ["'
         );
 
         $this->accessor_->get($this->testData_[1]->instId, 'ALICE');
@@ -147,7 +148,7 @@ class InstAccessorTest extends TestCase
         $this->expectException(DataNotFound::class);
 
         $this->expectExceptionMessage(
-            'Data not found in table "bar_inst" for key ["'
+            'Data not found in table "inst" for key ["'
         );
 
         $this->accessor_->get($this->testData_[1]->instId, 'alice', 'qux');
@@ -278,7 +279,7 @@ class InstAccessorTest extends TestCase
         $this->expectException(DataNotFound::class);
 
         $this->expectExceptionMessage(
-            'Data not found in table "bar_inst" for key "baz"'
+            'Data not found in table "inst" for key "baz"'
         );
 
         $this->accessor_->remove('baz');

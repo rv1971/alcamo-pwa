@@ -183,7 +183,10 @@ class Cli extends AbstractCli
             );
         }
 
-        $this->accountMgr_ = AccountMgr::newFromConf($this->conf_);
+        /* For testing purposes, innerRun may be called multiple times. */
+        if (!isset($this->accountMgr_)) {
+            $this->accountMgr_ = AccountMgr::newFromConf($this->conf_);
+        }
 
         if ($this->getOption('verbose') > 0) {
             $this->conf_['smtp']['debug'] = true;

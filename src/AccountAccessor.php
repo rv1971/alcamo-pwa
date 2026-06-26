@@ -2,21 +2,35 @@
 
 namespace alcamo\pwa;
 
+use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 
 class AccountAccessor extends AbstractTableAccessor
 {
-    public const RECORD_CLASS = AccountRecord::class;
+    public const RELATION_NAME = 'account';
 
-    public const TABLE_NAME = 'account';
+    public const FETCH_CLASS = AccountRecord::class;
 
-    public const GET_STMT = "SELECT * FROM %s WHERE username = ?";
+    public const GET_STMT = "SELECT * FROM /*_*/%s WHERE username = ?";
 
     public const ADD_STMT =
-        "INSERT INTO %s(username, created, modified)\n"
+        "INSERT INTO /*_*/%s(username, created, modified)\n"
         . "  VALUES(?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
 
-    public const REMOVE_STMT = "DELETE FROM %s WHERE username = ?";
+    public const REMOVE_STMT = "DELETE FROM /*_*/%s WHERE username = ?";
+
+    /**
+     * @param $props array|object Properties containing
+     * - `db`
+     *   - `dsn`
+     *   - `?string namePrefix`
+     */
+    public static function newFromDbAccessorAndConf(
+        DbAccessor $dbAccessor,
+        $conf
+    ): RelationAccessor {
+        return new static($dbAccessor);
+    }
 
     public function get($username): ?AccountRecord
     {
@@ -45,7 +59,7 @@ class AccountAccessor extends AbstractTableAccessor
              *  exist */
             throw (new DataNotFound())->setMessageContext(
                 [
-                    'inTable' => $this->tableName_,
+                    'inTable' => $this->relationName_,
                     'forKey' => $username
                 ]
             );

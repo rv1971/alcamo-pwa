@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\dao\DbAccessor;
 use alcamo\exception\DataNotFound;
 use PHPUnit\Framework\TestCase;
 
@@ -13,11 +14,14 @@ class AccountAccessorTest extends TestCase
 
     public function setUp(): void
     {
-        $this->accessor_ = AccountAccessor::newFromConf(
-            [ 'db' => [ 'connection' => static::DSN ] ]
-        );
+        $dbAccessor = DbAccessor::newFromProps([ 'dsn' => static::DSN ]);
 
-        $this->accessor_->createTable();
+        (new Installer($dbAccessor))->install();
+
+        $this->accessor_ = AccountAccessor::newFromDbAccessorAndConf(
+            $dbAccessor,
+            null
+        );
     }
 
     public function testAdd()

@@ -2,58 +2,60 @@
 
 namespace alcamo\pwa;
 
+use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
 class OpenInstAccessor extends AbstractTableAccessor
 {
-    public const RECORD_CLASS = OpenInstRecord::class;
+    public const RELATION_NAME = 'open_inst';
 
-    public const TABLE_NAME = 'open_inst';
+    public const FETCH_CLASS = OpenInstRecord::class;
 
     public const SELECT_STMT =
-        'SELECT * FROM %s ORDER BY username, created LIMIT 1000';
+        'SELECT * FROM /*_*/%s ORDER BY username, created LIMIT 1000';
 
-    public const GET_STMT = "SELECT * FROM %s WHERE username = ?";
+    public const GET_STMT = "SELECT * FROM /*_*/%s WHERE username = ?";
 
     public const GET_USER_INSTS_STMT =
-        "SELECT * FROM %s WHERE username = ? order by created";
+        "SELECT * FROM /*_*/%s WHERE username = ? order by created";
 
     public const ADD_STMT =
-        "INSERT INTO %s(passwd_hash, username, created)\n"
+        "INSERT INTO /*_*/%s(passwd_hash, username, created)\n"
         . "  VALUES(?, ?, CURRENT_TIMESTAMP)";
 
-    public const REMOVE_STMT = "DELETE FROM %s WHERE passwd_hash = ?";
+    public const REMOVE_STMT = "DELETE FROM /*_*/%s WHERE passwd_hash = ?";
 
     private $passwdTransformer_; ///< PasswdTransformer
     private $maxAge_;            ///< Duration
 
     /**
-     * @param $conf array or ArrayAccess object containing
+     * @param $props array|object Properties containing
      * - `db`
-     *   - `connection`
-     *   - `?string tablePrefix`
+     *   - `dsn`
+     *   - `?string namePrefix`
      * - `string passwdKey`
      * - `string maxOpenInstAge`
      */
-    public static function newFromConf(
-        iterable $conf
-    ): AbstractTableAccessor {
+    public static function newFromDbAccessorAndConf(
+        DbAccessor $dbAccessor,
+        $conf
+    ): RelationAccessor {
+        $conf = (object)$conf;
+
         return new static(
-            $conf['db']['connection'],
-            $conf['db']['tablePrefix'] ?? null,
-            new PasswdTransformer($conf['passwdKey']),
-            new Duration($conf['maxOpenInstAge'])
+            $dbAccessor,
+            new PasswdTransformer($conf->passwdKey),
+            new Duration($conf->maxOpenInstAge)
         );
     }
 
     public function __construct(
-        $connection,
-        ?string $tablePrefix,
+        DbAccessor $dbAccessor,
         PasswdTransformer $passwdTransformer,
         Duration $maxAge
     ) {
-        parent::__construct($connection, $tablePrefix);
+        parent::__construct($dbAccessor);
 
         $this->passwdTransformer_ = $passwdTransformer;
         $this->maxAge_ = $maxAge;
@@ -98,7 +100,7 @@ class OpenInstAccessor extends AbstractTableAccessor
     public function getUserInsts(string $username): \Traversable
     {
         return $this->query(
-            sprintf(static::GET_USER_INSTS_STMT, $this->tableName_),
+            sprintf(static::GET_USER_INSTS_STMT, $this->relationName_),
             [ $username ]
         );
     }
@@ -126,7 +128,7 @@ class OpenInstAccessor extends AbstractTableAccessor
              *  exist */
             throw (new DataNotFound())->setMessageContext(
                 [
-                    'inTable' => $this->tableName_,
+                    'inTable' => $this->relationName_,
                     'forKey' => $passwdHash
                 ]
             );

@@ -1,6 +1,6 @@
 {
     "db": {
-        "connection": "sqlite::memory:"
+        "dsn": "sqlite::memory:"
     },
     "passwdKey": "HY2la0fIOaaYZxGsuY14IA",
     "maxOpenInstAge": "P3D",

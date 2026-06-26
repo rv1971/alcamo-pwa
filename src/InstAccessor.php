@@ -2,30 +2,30 @@
 
 namespace alcamo\pwa;
 
-use alcamo\dao\Statement;
+use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
 class InstAccessor extends AbstractTableAccessor
 {
-    public const RECORD_CLASS = InstRecord::class;
+    public const RELATION_NAME = 'inst';
 
-    public const TABLE_NAME = 'inst';
+    public const FETCH_CLASS = InstRecord::class;
 
     public const SELECT_STMT =
-        'SELECT * FROM %s ORDER BY username, modified DESC LIMIT 1000';
+        'SELECT * FROM /*_*/%s ORDER BY username, modified DESC LIMIT 1000';
 
-    public const GET_STMT = 'SELECT * FROM %s WHERE inst_id = ?';
+    public const GET_STMT = 'SELECT * FROM /*_*/%s WHERE inst_id = ?';
 
     public const GET_USER_INSTS_STMT =
-        'SELECT * FROM %s WHERE username = ? ORDER BY modified';
+        'SELECT * FROM /*_*/%s WHERE username = ? ORDER BY modified';
 
     public const GET_USER_USER_AGENT_INSTS_STMT =
-        'SELECT * FROM %s WHERE username = ? and user_agent = ? '
+        'SELECT * FROM /*_*/%s WHERE username = ? and user_agent = ? '
         . 'ORDER BY modified';
 
     public const ADD_STMT = <<<EOD
-INSERT INTO %s(
+INSERT INTO /*_*/%s(
     inst_id,
     username,
     passwd_hash,
@@ -41,7 +41,7 @@ EOD;
 
     /** `created = created` to work around auto-updating columns in mysql. */
     public const MODIFY_STMT = <<<EOD
-UPDATE %s SET
+UPDATE /*_*/%s SET
     user_agent = ?,
     launcher = ?,
     created = created,
@@ -51,18 +51,18 @@ EOD;
 
     /** `created = created` to work around auto-updating columns in mysql. */
     public const REPLACE_INST_STMT = <<<EOD
-UPDATE %s SET
+UPDATE /*_*/%s SET
     inst_id = ?,
     created = created,
     modified = CURRENT_TIMESTAMP
 WHERE inst_id = ?
 EOD;
 
-    public const REMOVE_STMT = "DELETE FROM %s WHERE inst_id = ?";
+    public const REMOVE_STMT = "DELETE FROM /*_*/%s WHERE inst_id = ?";
 
     /** `created = created` to work around auto-updating columns in mysql. */
     public const UPDATE_INST_STMT = <<<EOD
-UPDATE %s SET
+UPDATE /*_*/%s SET
     user_agent = ?,
     app_version = ?,
     launcher = ?,
@@ -76,36 +76,36 @@ EOD;
     private $minReplaceableInstAge_; ///< ?Duration
 
     /**
-     * @param $conf array or ArrayAccess object containing
+     * @param $props array|object Properties containing
      * - `db`
-     *   - `connection`
-     *   - `?string tablePrefix`
+     *   - `dsn`
+     *   - `?string namePrefix`
      * - `string passwdKey`
      * - optional `string minReplaceableInstAge`
      */
-    public static function newFromConf(
-        iterable $conf
-    ): AbstractTableAccessor {
+    public static function newFromDbAccessorAndConf(
+        DbAccessor $dbAccessor,
+        $conf
+    ): RelationAccessor {
+        $conf = (object)$conf;
+
         return new static(
-            $conf['db']['connection'],
-            $conf['db']['tablePrefix'] ?? null,
-            new PasswdTransformer($conf['passwdKey']),
-            isset($conf['minReplaceableInstAge'])
-            ? new Duration($conf['minReplaceableInstAge'])
+            $dbAccessor,
+            new PasswdTransformer($conf->passwdKey),
+            isset($conf->minReplaceableInstAge)
+            ? new Duration($conf->minReplaceableInstAge)
             : null
         );
     }
 
     public function __construct(
-        $connection,
-        ?string $tablePrefix,
+        DbAccessor $dbAccessor,
         PasswdTransformer $passwdTransformer,
         ?Duration $minReplaceableInstAge
     ) {
-        parent::__construct($connection, $tablePrefix);
+        parent::__construct($dbAccessor);
 
         $this->passwdTransformer_ = $passwdTransformer;
-
         $this->minReplaceableInstAge_ = $minReplaceableInstAge;
     }
 
@@ -131,7 +131,7 @@ EOD;
                      *  given but does not match */
                     throw (new DataNotFound())->setMessageContext(
                         [
-                            'inTable' => $this->tableName_,
+                            'inTable' => $this->relationName_,
                             'forKey' => [ $instId, $username ]
                         ]
                     );
@@ -147,7 +147,7 @@ EOD;
                      *  given but password does not match */
                     throw (new DataNotFound())->setMessageContext(
                         [
-                            'inTable' => $this->tableName_,
+                            'inTable' => $this->relationName_,
                             'forKey' => [ $instId, $username, $obfuscated ]
                         ]
                     );
@@ -176,7 +176,7 @@ EOD;
                         $stmt = $this->prepare(
                             sprintf(
                                 static::REPLACE_INST_STMT,
-                                $this->tableName_
+                                $this->relationName_
                             )
                         );
 
@@ -207,7 +207,7 @@ EOD;
     public function getUserInsts(string $username): \Traversable
     {
         return $this->query(
-            sprintf(static::GET_USER_INSTS_STMT, $this->tableName_),
+            sprintf(static::GET_USER_INSTS_STMT, $this->relationName_),
             [ $username ]
         );
     }
@@ -217,7 +217,7 @@ EOD;
         string $userAgent
     ): \Traversable {
         return $this->query(
-            sprintf(static::GET_USER_USER_AGENT_INSTS_STMT, $this->tableName_),
+            sprintf(static::GET_USER_USER_AGENT_INSTS_STMT, $this->relationName_),
             [ $username, $userAgent ]
         );
     }
@@ -254,7 +254,7 @@ EOD;
         if (!$stmt->rowCount()) {
             throw (new DataNotFound())->setMessageContext(
                 [
-                    'inTable' => $this->tableName_,
+                    'inTable' => $this->relationName_,
                     'forKey' => $instId
                 ]
             );
@@ -268,7 +268,7 @@ EOD;
         ?string $launcher = null
     ): void {
         $stmt = $this->prepare(
-            sprintf(static::UPDATE_INST_STMT, $this->tableName_)
+            sprintf(static::UPDATE_INST_STMT, $this->relationName_)
         );
 
         $stmt->execute([ $userAgent, $appVersion, $launcher, $instId ]);
@@ -276,7 +276,7 @@ EOD;
         if (!$stmt->rowCount()) {
             throw (new DataNotFound())->setMessageContext(
                 [
-                    'inTable' => $this->tableName_,
+                    'inTable' => $this->relationName_,
                     'forKey' => $instId
                 ]
             );
@@ -292,7 +292,7 @@ EOD;
         if (!$stmt->rowCount()) {
             throw (new DataNotFound())->setMessageContext(
                 [
-                    'inTable' => $this->tableName_,
+                    'inTable' => $this->relationName_,
                     'forKey' => $instId
                 ]
             );

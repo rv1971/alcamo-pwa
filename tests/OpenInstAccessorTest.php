@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\dao\DbAccessor;
 use alcamo\exception\DataNotFound;
 use PHPUnit\Framework\TestCase;
 
@@ -13,30 +14,30 @@ class OpenInstAccessorTest extends TestCase
 
     public function setUp(): void
     {
-        $pdo = new \PDO(static::DSN);
+        $dbAccessor = DbAccessor::newFromProps(
+            [ 'dsn' => static::DSN, 'namePrefix' => 'bar_' ]
+        );
 
-        $conf = [
-            'db' => [
-                'connection' => $pdo,
-                'tablePrefix' => 'foo_'
-            ],
-            'passwdKey' => random_bytes(8),
-            'maxOpenInstAge' => 'PT5S'
-        ];
+        $dbAccessor->executeScript('PRAGMA foreign_keys = ON');
 
-        $pdo->query('PRAGMA foreign_keys = ON');
+        (new Installer($dbAccessor))->install();
 
-        $this->accessor_ = OpenInstAccessor::newFromConf($conf);
+        $this->accessor_ = OpenInstAccessor::newFromDbAccessorAndConf(
+            $dbAccessor,
+            [
+                'passwdKey' => random_bytes(8),
+                'maxOpenInstAge' => 'PT5S'
+            ]
+        );
 
-        $accountAccessor_ = AccountAccessor::newFromConf($conf);
-
-        $accountAccessor_->createTable();
+        $accountAccessor_ = AccountAccessor::newFromDbAccessorAndConf(
+            $dbAccessor,
+            null
+        );
 
         $accountAccessor_->add('alice');
 
         $accountAccessor_->add('bob');
-
-        $this->accessor_->createTable();
     }
 
     public function testGetUserInsts()
@@ -142,7 +143,7 @@ class OpenInstAccessorTest extends TestCase
         $this->expectException(DataNotFound::class);
 
         $this->expectExceptionMessage(
-            'Data not found in table "foo_open_inst" for key "bar"'
+            'Data not found in table "open_inst" for key "bar"'
         );
 
         $this->accessor_->remove('bar');

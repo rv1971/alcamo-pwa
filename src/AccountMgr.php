@@ -2,6 +2,7 @@
 
 namespace alcamo\pwa;
 
+use alcamo\dao\{DbAccessor, RelationAccessor};
 use alcamo\exception\DataNotFound;
 use alcamo\time\Duration;
 
@@ -14,21 +15,25 @@ class AccountMgr
     private $maxPrevInstAge_;   /// Duration
 
     /**
-     * @param $conf array or ArrayAccess object containing
+     * @param $props array|object Properties containing
      * - `db`
-     *   - `connection`
-     *   - `?string tablePrefix`
+     *   - `dsn`
+     *   - `?string namePrefix`
      * - `string passwdKey`
      * - `string maxOpenInstAge`
      * - `string maxPrevInstAge`
      */
-    public static function newFromConf(iterable $conf): self
+    public static function newFromConf($conf): self
     {
+        $conf = (object)$conf;
+
+        $dbAccessor = DbAccessor::newFromProps($conf->db);
+
         return new static(
-            AccountAccessor::newFromConf($conf),
-            OpenInstAccessor::newFromConf($conf),
-            InstAccessor::newFromConf($conf),
-            new Duration($conf['maxPrevInstAge'])
+            AccountAccessor::newFromDbAccessorAndConf($dbAccessor, $conf),
+            OpenInstAccessor::newFromDbAccessorAndConf($dbAccessor, $conf),
+            InstAccessor::newFromDbAccessorAndConf($dbAccessor, $conf),
+            new Duration($conf->maxPrevInstAge)
         );
     }
 
@@ -238,8 +243,6 @@ class AccountMgr
 
     public function createTables(): void
     {
-        $this->accountAccessor_->createTable();
-        $this->openInstAccessor_->createTable();
-        $this->instAccessor_->createTable();
+        (new Installer($this->accountAccessor_->getDbAccessor()))->install();
     }
 }

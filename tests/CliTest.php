@@ -16,7 +16,7 @@ class CliTest extends TestCase
         $this->cli_ = new Cli(
             [
                 'db' => [
-                    'connection' => static::DSN
+                    'dsn' => static::DSN
                 ],
                 'passwdKey' => random_bytes(8),
                 'maxOpenInstAge' => 'PT4S',
@@ -69,19 +69,12 @@ class CliTest extends TestCase
 
     public function testAddInst(): void
     {
-        $dbAccessor = new DbAccessor(self::DSN);
+        $this->cli_->run('setup-database');
 
-        $conf = $this->cli_->getConf();
-        $conf['db']['connection'] = $dbAccessor;
-
-        (new Cli($conf))->run('setup-database');
-
-        $cli3 = new Cli($conf);
-
-        $cli3->run('add alice');
+        $this->cli_->run('add alice');
 
         foreach (
-            $cli3->getAccountMgr()->getOpenInstAccessor() as $record
+            $this->cli_->getAccountMgr()->getOpenInstAccessor() as $record
         ) {
             $this->assertSame(
                 'alice',

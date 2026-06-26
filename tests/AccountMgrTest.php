@@ -42,7 +42,7 @@ class AccountMgrTest extends TestCase
     {
         $this->mgr_ = AccountMgr::newFromConf(
             [
-                'db' => [ 'connection' => static::DSN ],
+                'db' => [ 'dsn' => static::DSN ],
                 'passwdKey' => random_bytes(8),
                 'maxOpenInstAge' => 'PT4S',
                 'maxPrevInstAge' => 'PT2S'
