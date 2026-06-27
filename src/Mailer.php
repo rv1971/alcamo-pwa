@@ -31,7 +31,9 @@ EOD;
     public const TESTMAIL_CONTENT_TYPE = self::CONTENT_TYPE_TEXT_HTML;
 
      /**
-     * @param $conf array or ArrayAccess object containing
+     * @brief Create from named properties
+     *
+     * @param $props array|object Properties containing
      * - `host`
      * - `port`
      * - `username`
@@ -39,16 +41,18 @@ EOD;
      * - `from`
      * - `?bool debug`
      */
-    public static function newFromConf(iterable $conf): self
+    public static function newFromProps($props): self
     {
+        $props = (object)$props;
+
         return new self(
-            $conf['host'],
-            $conf['port'],
-            $conf['encryption'],
-            $conf['username'],
-            $conf['passwd'],
-            $conf['from'],
-            $conf['debug'] ?? null
+            $props->host,
+            $props->port,
+            $props->encryption,
+            $props->username,
+            $props->passwd,
+            $props->from,
+            $props->debug ?? null
         );
     }
 
