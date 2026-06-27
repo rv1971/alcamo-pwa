@@ -234,7 +234,7 @@ class Cli extends AbstractCli
                 static::ACCOUNT_LIST_FMT,
                 substr($record->username, 0, 39),
                 $record->created->format(static::TIMESTAMP_FMT),
-                $record->modified()->format(static::TIMESTAMP_FMT)
+                $record->modified->format(static::TIMESTAMP_FMT)
             );
         }
 
@@ -277,7 +277,7 @@ class Cli extends AbstractCli
                     $record->launcher,
                     $record->passwd_hash,
                     $record->created->format(static::TIMESTAMP_FMT),
-                    $record->modified()->format(static::TIMESTAMP_FMT)
+                    $record->modified->format(static::TIMESTAMP_FMT)
                 );
             }
         } elseif ($this->getOption('user-agent-detail')) {
@@ -330,7 +330,7 @@ class Cli extends AbstractCli
                     substr($record->username, 0, 24),
                     $record->getShortInstId(),
                     $record->app_version,
-                    $record->modified()->format(static::DATE_FMT)
+                    $record->modified->format(static::DATE_FMT)
                 );
             }
         } elseif ($this->getOption('timestamp-detail')) {
@@ -361,7 +361,7 @@ class Cli extends AbstractCli
                     $record->getShortInstId(),
                     substr(str_replace('Mozilla/5.0 ', '', $record->user_agent), 0, 14),
                     substr($record->app_version, 0, 8),
-                    $record->modified()->format(static::TIMESTAMP_FMT)
+                    $record->modified->format(static::TIMESTAMP_FMT)
                 );
             }
         } else {
@@ -392,7 +392,7 @@ class Cli extends AbstractCli
                     $record->getShortInstId(),
                     substr(str_replace('Mozilla/5.0 ', '', $record->user_agent), 0, 23),
                     substr($record->app_version, 0, 8),
-                    $record->modified()->format(static::DATE_FMT)
+                    $record->modified->format(static::DATE_FMT)
                 );
             }
         }
