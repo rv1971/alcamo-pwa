@@ -77,14 +77,14 @@ class OpenInstAccessor extends RelationAccessor
             if (
                 $this->passwdTransformer_->verifyObfuscatedPasswd(
                     $obfuscated,
-                    $record->getPasswdHash()
+                    $record->passwd_hash
                 )
             ) {
                 if (
-                    $record->getCreated()->add($this->maxAge_)->getTimestamp()
+                    $record->created->add($this->maxAge_)->getTimestamp()
                     < (new \DateTimeImmutable())->getTimestamp()
                 ) {
-                    $this->remove($record->getPasswdHash());
+                    $this->remove($record->passwd_hash);
                     return null;
                 }
 

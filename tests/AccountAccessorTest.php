@@ -29,7 +29,7 @@ class AccountAccessorTest extends TestCase
 
         $this->assertSame(
             'alice',
-            $this->accessor_->get('alice')->getUsername()
+            $this->accessor_->get('alice')->username
         );
 
         $this->assertNull($this->accessor_->get('ALICE'));
@@ -37,9 +37,9 @@ class AccountAccessorTest extends TestCase
         $accounts = [];
 
         foreach ($this->accessor_ as $record) {
-            $accounts[$record->getUsername()] = [
-                $record->getCreated(),
-                $record->getModified(),
+            $accounts[$record->username] = [
+                $record->created,
+                $record->modified,
             ];
         }
 

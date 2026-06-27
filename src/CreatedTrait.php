@@ -5,12 +5,7 @@ namespace alcamo\pwa;
 /// Database record having column `created`
 trait CreatedTrait
 {
-    private $created;
-
-    public function getCreated(): \DateTimeImmutable
-    {
-        return $this->created;
-    }
+    public $created;
 
     private function initCreated(): void
     {

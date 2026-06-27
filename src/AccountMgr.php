@@ -64,7 +64,7 @@ class AccountMgr
         $pos2 = strpos($userAgent2, ')');
 
         /** - If one of the strings does not contain a closing parenthesis,
-         * return true iff the strings are euqal. */
+         * return true iff the strings are equal. */
         if ($pos1 === false || $pos2 === false) {
             return $userAgent1 == $userAgent2;
         }
@@ -171,13 +171,13 @@ class AccountMgr
             $instAccessor->add(
                 $instId,
                 $username,
-                $openInst->getPasswdHash(),
+                $openInst->passwd_hash,
                 $userAgent,
                 $appVersion,
                 $launcher
             );
 
-            $this->openInstAccessor_->remove($openInst->getPasswdHash());
+            $this->openInstAccessor_->remove($openInst->passwd_hash);
 
             return;
         }
@@ -199,13 +199,13 @@ class AccountMgr
             if (
                 $instAccessor->getPasswdTransformer()->verifyObfuscatedPasswd(
                     $obfuscated,
-                    $inst->getPasswdHash()
+                    $inst->passwd_hash
                 )
             ) {
                 if (
                     static::isSimilarUserAgent(
                         $userAgent,
-                        $inst->getUserAgent()
+                        $inst->user_agent
                     )
                 ) {
                     $instCandidates[] = $inst;
@@ -215,15 +215,15 @@ class AccountMgr
 
         if (
             count($instCandidates) == 1
-            && $instCandidates[0]->getModified()->add($this->maxPrevInstAge_)
+            && $instCandidates[0]->modified->add($this->maxPrevInstAge_)
                 ->getTimestamp()
             > (new \DateTimeImmutable())->getTimestamp()
         ) {
             $instAccessor->add(
                 $instId,
                 $username,
-                $inst->getPasswdHash(),
-                $inst->getUserAgent(),
+                $inst->passwd_hash,
+                $inst->user_agent,
                 $appVersion,
                 $launcher
             );
@@ -238,7 +238,7 @@ class AccountMgr
 
     public function removeInst(string $instId)
     {
-        $username = $this->instAccessor_->get($instId)->getUsername();
+        $username = $this->instAccessor_->get($instId)->username;
 
         $this->instAccessor_->remove($instId);
 
@@ -252,10 +252,5 @@ class AccountMgr
 
         // remove user if no (open) installations left
         $this->accountAccessor_->remove($username);
-    }
-
-    public function createTables(): void
-    {
-        (new Installer($this->accountAccessor_->getDbAccessor()))->install();
     }
 }

@@ -233,9 +233,9 @@ class Cli extends AbstractCli
         foreach ($this->getAccountMgr()->getAccountAccessor() as $record) {
             printf(
                 static::ACCOUNT_LIST_FMT,
-                substr($record->getUsername(), 0, 39),
-                $record->getCreated()->format(static::TIMESTAMP_FMT),
-                $record->getModified()->format(static::TIMESTAMP_FMT)
+                substr($record->username, 0, 39),
+                $record->created->format(static::TIMESTAMP_FMT),
+                $record->modified()->format(static::TIMESTAMP_FMT)
             );
         }
 
@@ -257,7 +257,7 @@ class Cli extends AbstractCli
             $records = [];
 
             foreach ($iterator as $record) {
-                if ($record->getLauncher() !== null) {
+                if ($record->launcher !== null) {
                     $records[] = $record;
                 }
             }
@@ -271,14 +271,14 @@ class Cli extends AbstractCli
             foreach ($iterator as $record) {
                 printf(
                     static::INST_LIST_DETAIL_FMT,
-                    $record->getUsername(),
-                    $record->getInstId(),
-                    $record->getUserAgent(),
-                    $record->getAppVersion(),
-                    $record->getLauncher(),
-                    $record->getPasswdHash(),
-                    $record->getCreated()->format(static::TIMESTAMP_FMT),
-                    $record->getModified()->format(static::TIMESTAMP_FMT)
+                    $record->username,
+                    $record->inst_id,
+                    $record->user_agent,
+                    $record->app_version,
+                    $record->launcher,
+                    $record->passwd_hash,
+                    $record->created->format(static::TIMESTAMP_FMT),
+                    $record->modified()->format(static::TIMESTAMP_FMT)
                 );
             }
         } elseif ($this->getOption('user-agent-detail')) {
@@ -301,9 +301,9 @@ class Cli extends AbstractCli
             foreach ($iterator as $record) {
                 printf(
                     static::INST_LIST_USER_AGENT_DETAIL_FMT,
-                    substr($record->getUsername(), 0, 24),
+                    substr($record->username, 0, 24),
                     $record->getShortInstId(),
-                    substr(str_replace('Mozilla/5.0 ', '', $record->getUserAgent()), 0, 45)
+                    substr(str_replace('Mozilla/5.0 ', '', $record->user_agent), 0, 45)
                 );
             }
         } elseif ($this->getOption('app-version-detail')) {
@@ -328,10 +328,10 @@ class Cli extends AbstractCli
             foreach ($iterator as $record) {
                 printf(
                     static::INST_LIST_APP_VERSION_DETAIL_FMT,
-                    substr($record->getUsername(), 0, 24),
+                    substr($record->username, 0, 24),
                     $record->getShortInstId(),
-                    $record->getAppVersion(),
-                    $record->getModified()->format(static::DATE_FMT)
+                    $record->app_version,
+                    $record->modified()->format(static::DATE_FMT)
                 );
             }
         } elseif ($this->getOption('timestamp-detail')) {
@@ -358,11 +358,11 @@ class Cli extends AbstractCli
             foreach ($iterator as $record) {
                 printf(
                     static::INST_LIST_TIMESTAMP_DETAIL_FMT,
-                    substr($record->getUsername(), 0, 24),
+                    substr($record->username, 0, 24),
                     $record->getShortInstId(),
-                    substr(str_replace('Mozilla/5.0 ', '', $record->getUserAgent()), 0, 14),
-                    substr($record->getAppVersion(), 0, 8),
-                    $record->getModified()->format(static::TIMESTAMP_FMT)
+                    substr(str_replace('Mozilla/5.0 ', '', $record->user_agent), 0, 14),
+                    substr($record->app_version, 0, 8),
+                    $record->modified()->format(static::TIMESTAMP_FMT)
                 );
             }
         } else {
@@ -389,11 +389,11 @@ class Cli extends AbstractCli
             foreach ($iterator as $record) {
                 printf(
                     static::INST_LIST_FMT,
-                    substr($record->getUsername(), 0, 24),
+                    substr($record->username, 0, 24),
                     $record->getShortInstId(),
-                    substr(str_replace('Mozilla/5.0 ', '', $record->getUserAgent()), 0, 23),
-                    substr($record->getAppVersion(), 0, 8),
-                    $record->getModified()->format(static::DATE_FMT)
+                    substr(str_replace('Mozilla/5.0 ', '', $record->user_agent), 0, 23),
+                    substr($record->app_version, 0, 8),
+                    $record->modified()->format(static::DATE_FMT)
                 );
             }
         }
@@ -420,8 +420,8 @@ class Cli extends AbstractCli
         foreach ($this->getAccountMgr()->getOpenInstAccessor() as $record) {
             printf(
                 static::OPEN_INST_LIST_FMT,
-                substr($record->getUsername(), 0, 58),
-                $record->getCreated()->format(static::TIMESTAMP_FMT)
+                substr($record->username, 0, 58),
+                $record->created->format(static::TIMESTAMP_FMT)
             );
         }
 
@@ -442,7 +442,9 @@ class Cli extends AbstractCli
 
     public function setupDatabase(): int
     {
-        $this->getAccountMgr()->createTables();
+        (new Installer(
+            $this->getAccountMgr()->getAccountAccessor()->getDbAccessor()
+        ))->install();
 
         return 0;
     }

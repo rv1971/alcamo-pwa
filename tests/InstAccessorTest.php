@@ -94,21 +94,21 @@ class InstAccessorTest extends TestCase
         foreach ($this->testData_ as $data) {
             $record = $this->accessor_->get($data->instId);
 
-            $this->assertSame($data->instId, $record->getInstId());
+            $this->assertSame($data->instId, $record->inst_id);
 
-            $this->assertSame($data->username, $record->getUsername());
+            $this->assertSame($data->username, $record->username);
 
-            $this->assertSame($data->passwdHash, $record->getPasswdHash());
+            $this->assertSame($data->passwdHash, $record->passwd_hash);
 
-            $this->assertSame($data->userAgent, $record->getUserAgent());
+            $this->assertSame($data->userAgent, $record->user_agent);
 
-            $this->assertSame($data->appVersion, $record->getAppVersion());
+            $this->assertSame($data->appVersion, $record->app_version);
 
             if (isset($data->launcher)) {
-                $this->assertSame($data->launcher, $record->getLauncher());
+                $this->assertSame($data->launcher, $record->launcher);
             }
 
-            $this->assertSame(0, $record->getUpdateCount());
+            $this->assertSame(0, $record->update_count);
         }
 
         $this->assertNull($this->accessor_->get('foo'));
@@ -124,7 +124,7 @@ class InstAccessorTest extends TestCase
                     $this->testData_[1]->username,
                     $this->testData_[1]->obfuscated
                 )
-                ->getInstId()
+                ->inst_id
         );
     }
 
@@ -155,7 +155,7 @@ class InstAccessorTest extends TestCase
         $insts = [];
 
         foreach ($this->accessor_->getUserInsts('bob') as $record) {
-            $insts[$record->getInstId()] = $record;
+            $insts[$record->inst_id] = $record;
         }
 
         $expectedInsts = [
@@ -176,7 +176,7 @@ class InstAccessorTest extends TestCase
                 'BlackBerry9800/5.0.0.690'
             ) as $record
         ) {
-            $insts[$record->getInstId()] = $record;
+            $insts[$record->inst_id] = $record;
         }
 
         $expectedInsts = [
@@ -197,9 +197,9 @@ class InstAccessorTest extends TestCase
 
         $inst = $this->accessor_->get($this->testData_[2]->instId);
 
-        $this->assertSame($userAgent, $inst->getUserAgent());
+        $this->assertSame($userAgent, $inst->user_agent);
 
-        $this->assertSame($launcher, $inst->getLauncher());
+        $this->assertSame($launcher, $inst->launcher);
     }
 
     public function testUpdateInst()
@@ -219,13 +219,13 @@ class InstAccessorTest extends TestCase
 
         $inst = $this->accessor_->get($this->testData_[2]->instId);
 
-        $this->assertSame(1, $inst->getUpdateCount());
+        $this->assertSame(1, $inst->update_count);
 
-        $this->assertSame($userAgent, $inst->getUserAgent());
+        $this->assertSame($userAgent, $inst->user_agent);
 
-        $this->assertSame($appVersion, $inst->getAppVersion());
+        $this->assertSame($appVersion, $inst->app_version);
 
-        $this->assertSame($launcher, $inst->getLauncher());
+        $this->assertSame($launcher, $inst->launcher);
     }
 
     public function testReplace()
@@ -240,7 +240,7 @@ class InstAccessorTest extends TestCase
                 $testData->instId,
                 'bob',
                 $testData->obfuscated
-            )->getInstId()
+            )->inst_id
         );
 
         $this->assertNull(
@@ -255,7 +255,7 @@ class InstAccessorTest extends TestCase
                 $newInstId,
                 'bob',
                 $testData->obfuscated
-            )->getInstId()
+            )->inst_id
         );
     }
 

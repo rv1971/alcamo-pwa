@@ -6,56 +6,21 @@ class InstRecord
 {
     use CreatedModifiedTrait;
 
-    private $inst_id;
-    private $username;
-    private $passwd_hash;
-    private $user_agent;
-    private $app_version;
-    private $launcher;
-    private $update_count;
+    public $inst_id;
+    public $username;
+    public $passwd_hash;
+    public $user_agent;
+    public $app_version;
+    public $launcher;
+    public $update_count;
 
     public function __construct()
     {
         $this->initCreatedModified();
     }
 
-    public function getInstId(): string
-    {
-        return $this->inst_id;
-    }
-
     public function getShortInstId(): string
     {
         return substr($this->inst_id, 0, 6);
-    }
-
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    public function getPasswdHash(): string
-    {
-        return $this->passwd_hash;
-    }
-
-    public function getUserAgent(): string
-    {
-        return $this->user_agent;
-    }
-
-    public function getAppVersion(): string
-    {
-        return $this->app_version;
-    }
-
-    public function getLauncher(): ?string
-    {
-        return $this->launcher;
-    }
-
-    public function getUpdateCount(): int
-    {
-        return $this->update_count;
     }
 }

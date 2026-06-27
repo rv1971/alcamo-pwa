@@ -49,7 +49,8 @@ class AccountMgrTest extends TestCase
             ]
         );
 
-        $this->mgr_->createTables();
+        (new Installer($this->mgr_->getAccountAccessor()->getDbAccessor()))
+            ->install();
 
         foreach (static::TEST_DATA as $i => $data) {
             $data = (object)$data;
@@ -119,9 +120,9 @@ class AccountMgrTest extends TestCase
     public function testAddOpenInst()
     {
         foreach ($this->mgr_->getAccountAccessor() as $record) {
-            $accounts[$record->getUsername()] = [
-                $record->getCreated(),
-                $record->getModified(),
+            $accounts[$record->username] = [
+                $record->created,
+                $record->modified,
             ];
         }
 
@@ -162,15 +163,15 @@ class AccountMgrTest extends TestCase
                 $data->obfuscated
             );
 
-            $this->assertSame($data->userAgent, $inst->getUserAgent());
+            $this->assertSame($data->userAgent, $inst->user_agent);
 
-            $this->assertSame($data->appVersion, $inst->getAppVersion());
+            $this->assertSame($data->appVersion, $inst->app_version);
 
             if (isset($data->launcher)) {
-                $this->assertSame($data->launcher, $inst->getLauncher());
+                $this->assertSame($data->launcher, $inst->launcher);
             }
 
-            $this->assertSame(0, $inst->getUpdateCount());
+            $this->assertSame(0, $inst->update_count);
         }
 
         // test successful modify
@@ -196,13 +197,13 @@ class AccountMgrTest extends TestCase
         $inst = $this->mgr_->getInstAccessor()
             ->get($this->testData_[0]->instId);
 
-        $this->assertSame($userAgent1, $inst->getUserAgent());
+        $this->assertSame($userAgent1, $inst->user_agent);
 
-        $this->assertSame($appVersion, $inst->getAppVersion());
+        $this->assertSame($appVersion, $inst->app_version);
 
-        $this->assertSame($launcher, $inst->getLauncher());
+        $this->assertSame($launcher, $inst->launcher);
 
-        $this->assertSame(1, $inst->getUpdateCount());
+        $this->assertSame(1, $inst->update_count);
 
         // test successful second instance on same device
 
@@ -344,7 +345,7 @@ class AccountMgrTest extends TestCase
 
         $this->assertSame(
             'alice',
-            $this->mgr_->getAccountAccessor()->get('alice')->getUsername()
+            $this->mgr_->getAccountAccessor()->get('alice')->username
         );
 
         $this->mgr_->removeInst($this->testData_[3]->instId);
@@ -377,7 +378,7 @@ class AccountMgrTest extends TestCase
         // bob is still there because he has an open ionstallation
         $this->assertSame(
             'bob',
-            $this->mgr_->getAccountAccessor()->get('bob')->getUsername()
+            $this->mgr_->getAccountAccessor()->get('bob')->username
         );
     }
 

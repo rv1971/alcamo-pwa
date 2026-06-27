@@ -115,7 +115,7 @@ EOD
         ) {
             /** Verify user and password if username is given. */
             if (isset($username)) {
-                if ($record->getUsername() != $username) {
+                if ($record->username != $username) {
                     /** @throw alcamo::exception::DataNotFound if $username is
                      *  given but does not match */
                     throw (new DataNotFound())->setMessageContext(
@@ -129,7 +129,7 @@ EOD
                 if (
                     !$this->passwdTransformer_->verifyObfuscatedPasswd(
                         $obfuscated,
-                        $record->getPasswdHash()
+                        $record->passwd_hash
                     )
                 ) {
                     /** @throw alcamo::exception::DataNotFound if $username is
@@ -156,14 +156,14 @@ EOD
 
                 foreach ($this->getUserInsts($username) as $record) {
                     if (
-                        $record->getCreated() < $maxTimestamp
+                        $record->created < $maxTimestamp
                         && $this->passwdTransformer_->verifyObfuscatedPasswd(
                             $obfuscated,
-                            $record->getPasswdHash()
+                            $record->passwd_hash
                         )
                     ) {
                         $this->getStmt('replace-inst')
-                            ->execute([ $instId, $record->getInstId() ]);
+                            ->execute([ $instId, $record->inst_id ]);
 
                         /* Do not check rowCount() since for some reason it
                          * does not seem to work reliably with all postgres

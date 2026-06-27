@@ -49,7 +49,7 @@ class OpenInstAccessorTest extends TestCase
         foreach ($this->accessor_->getUserInsts('alice') as $record) {
             $this->assertSame(
                 'alice',
-                $record->getUsername()
+                $record->username
             );
 
             $i++;
@@ -77,28 +77,28 @@ class OpenInstAccessorTest extends TestCase
         $this->assertTrue(
             $this->accessor_->getPasswdTransformer()->verifyObfuscatedPasswd(
                 $alice1Obfuscated,
-                $alice1->getPasswdHash()
+                $alice1->passwd_hash
             )
         );
 
         $this->assertTrue(
             $this->accessor_->getPasswdTransformer()->verifyObfuscatedPasswd(
                 $alice2Obfuscated,
-                $alice2->getPasswdHash()
+                $alice2->passwd_hash
             )
         );
 
         $this->assertFalse(
             $this->accessor_->getPasswdTransformer()->verifyObfuscatedPasswd(
                 $alice2Obfuscated,
-                $alice1->getPasswdHash()
+                $alice1->passwd_hash
             )
         );
 
         $this->assertFalse(
             $this->accessor_->getPasswdTransformer()->verifyObfuscatedPasswd(
                 $alice1Obfuscated,
-                $alice2->getPasswdHash()
+                $alice2->passwd_hash
             )
         );
 

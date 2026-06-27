@@ -78,7 +78,7 @@ class CliTest extends TestCase
         ) {
             $this->assertSame(
                 'alice',
-                $record->getUsername()
+                $record->username
             );
         }
     }

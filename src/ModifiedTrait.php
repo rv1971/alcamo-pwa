@@ -5,12 +5,7 @@ namespace alcamo\pwa;
 /// Database record having column `modified`
 trait ModifiedTrait
 {
-    private $modified;
-
-    public function getModified(): \DateTimeImmutable
-    {
-        return $this->modified;
-    }
+    public $modified;
 
     private function initModified(): void
     {
