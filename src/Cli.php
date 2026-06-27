@@ -138,23 +138,23 @@ class Cli extends AbstractCli
 
     public const DATE_FMT = 'Y-m-d';
 
-    protected $conf_;
+    protected $conf_; ///< object
     protected $accountMgr_;
     protected $mailer_;
 
     /**
-     * @param $conf array or ArrayAccess object containing
+     * @param $conf array|object Properties containing
      * - `db`
      * - `smtp`
      */
-    public function __construct(iterable $conf)
+    public function __construct(object $conf)
     {
         parent::__construct();
 
         $this->conf_ = $conf;
     }
 
-    public function getConf(): iterable
+    public function getConf(): object
     {
         return $this->conf_;
     }
@@ -178,8 +178,7 @@ class Cli extends AbstractCli
 
         if ($this->getOption('json-config-file')) {
             $this->conf_ = json_decode(
-                file_get_contents($this->getOption('json-config-file')),
-                true
+                file_get_contents($this->getOption('json-config-file'))
             );
         }
 
@@ -189,10 +188,10 @@ class Cli extends AbstractCli
         }
 
         if ($this->getOption('verbose') > 0) {
-            $this->conf_['smtp']['debug'] = true;
+            $this->conf->smtp->debug = true;
         }
 
-        $this->mailer_ = Mailer::newFromConf($this->conf_['smtp']);
+        $this->mailer_ = Mailer::newFromProps($this->conf_->smtp);
 
         return 0;
     }
@@ -437,7 +436,7 @@ class Cli extends AbstractCli
 
     public function createUrl(string $username, string $obfuscated): string
     {
-        return "{$this->conf_['url']}?u=$username&p=" . bin2hex($obfuscated);
+        return "{$this->conf_->url}?u=$username&p=" . bin2hex($obfuscated);
     }
 
     public function setupDatabase(): int

@@ -14,15 +14,15 @@ class CliTest extends TestCase
     public function setUp(): void
     {
         $this->cli_ = new Cli(
-            [
-                'db' => [
+            (object)[
+                'db' => (object)[
                     'dsn' => static::DSN
                 ],
                 'passwdKey' => random_bytes(8),
                 'maxOpenInstAge' => 'PT4S',
                 'maxPrevInstAge' => 'PT5S',
                 'url' => 'https://localhost/myapp',
-                'smtp' => [
+                'smtp' => (object)[
                     'host' => 'smtp.example.info',
                     'port' => 587,
                     'encryption' => 'tls',
@@ -40,12 +40,12 @@ class CliTest extends TestCase
 
         $this->assertSame(
             'smtp.example.info',
-            $this->cli_->getConf()['smtp']['host']
+            $this->cli_->getConf()->smtp->host
         );
 
         $this->assertSame(
             'bob@example.info',
-            $this->cli_->getConf()['smtp']['from']
+            $this->cli_->getConf()->smtp->from
         );
 
         $cli2 = new Cli($this->cli_->getConf());
@@ -58,12 +58,12 @@ class CliTest extends TestCase
 
         $this->assertSame(
             'smtp.example.com',
-            $cli2->getConf()['smtp']['host']
+            $cli2->getConf()->smtp->host
         );
 
         $this->assertSame(
             'alice@example.com',
-            $cli2->getConf()['smtp']['from']
+            $cli2->getConf()->smtp->from
         );
     }
 
