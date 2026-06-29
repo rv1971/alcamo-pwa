@@ -4,7 +4,7 @@ namespace alcamo\pwa;
 
 use alcamo\cli\AbstractCli;
 use alcamo\uri\FileUriFactory;
-use alcamo\xml_conf\Loader;
+use alcamo\xml_conf\{ConfDocument, Loader};
 use GetOpt\{GetOpt, Operand};
 
 class Cli extends AbstractCli

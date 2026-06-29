@@ -60,12 +60,7 @@
     </xsd:documentation>
   </xsd:annotation>
 
-  <xsd:complexType name="Conf">
-    <xsd:sequence>
-      <xsd:element name="db" type="Db"/>
-      <xsd:element name="smtp" type="Smtp"/>
-    </xsd:sequence>
-
+  <xsd:attributeGroup name="topLevelAttrs">
     <xsd:attribute ref="dc:created" use="required"/>
     <xsd:attribute ref="dc:modified"/>
 
@@ -74,7 +69,16 @@
     <xsd:attribute name="maxPrevInstAge" type="xsd:duration" use="required"/>
     <xsd:attribute name="minReplaceableInstAge" type="xsd:duration"/>
     <xsd:attribute name="url" type="xsd:anyURI" use="required"/>
-  </xsd:complexType>
+  </xsd:attributeGroup>
 
-  <xsd:element name="conf" type="Conf"/>
+  <xsd:element name="conf">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="db" type="Db"/>
+        <xsd:element name="smtp" type="Smtp"/>
+      </xsd:sequence>
+
+      <xsd:attributeGroup ref="topLevelAttrs"/>
+    </xsd:complexType>
+  </xsd:element>
 </xsd:schema>

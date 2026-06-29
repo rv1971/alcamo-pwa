@@ -6,7 +6,6 @@ use alcamo\dao\DbAccessor;
 use alcamo\xml_conf\Loader;
 use PHPUnit\Framework\TestCase;
 
-/* This also tests ConfDocument. */
 class CliTest extends TestCase
 {
     public const DSN = 'sqlite::memory:';
