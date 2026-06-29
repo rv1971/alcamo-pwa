@@ -3,7 +3,6 @@
 namespace alcamo\pwa;
 
 use alcamo\cli\AbstractCli;
-use alcamo\uri\FileUriFactory;
 use alcamo\xml_conf\{ConfDocument, Loader};
 use GetOpt\{GetOpt, Operand};
 
@@ -176,9 +175,8 @@ class Cli extends AbstractCli
         parent::process($arguments);
 
         if ($this->getOption('config-file')) {
-            $this->conf_ = ConfDocument::newFromUri(
-                (new FileUriFactory())->create($this->getOption('config-file'))
-            );
+            $this->conf_ =
+                ConfDocument::newFromPathname($this->getOption('config-file'));
         } else {
             $this->conf_ = Loader::newFromDocumentClass(ConfDocument::class)
                 ->createFromXmlPathnameIfNotExistsAndLoad(
