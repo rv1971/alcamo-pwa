@@ -2,3 +2,7 @@
 \#*#
 /composer.lock
 /vendor
+/xsd/dc.xsd
+/xsd/rdfs.xsd
+/xsd/xml.xsd
+/xsd/XMLSchema.xsd
