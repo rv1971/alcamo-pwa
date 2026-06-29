@@ -26,6 +26,9 @@
         "symfony/polyfill-uuid": "^1.25"
     },
     "scripts": {
+        "post-update-cmd": [
+            "php bin/update-xsds alcamo dom dc.xsd rdfs.xsd xml.xsd XMLSchema.xsd"
+        ],
         "test": [
             "phpunit tests",
             "phpcs --standard=PSR12 -p -s src",

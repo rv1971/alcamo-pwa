@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+# Syntax: update-xsds <vendor> <package> <file> ...
+
+unset($argv[0]);
+
+$baseDir = dirname(__DIR__);
+
+$vendorDir = $baseDir . DIRECTORY_SEPARATOR
+    . 'vendor' . DIRECTORY_SEPARATOR
+    . array_shift($argv) . DIRECTORY_SEPARATOR
+    . array_shift($argv) . DIRECTORY_SEPARATOR
+    . 'xsd' . DIRECTORY_SEPARATOR;
+
+$xsdDir = $baseDir . DIRECTORY_SEPARATOR
+    . 'xsd' . DIRECTORY_SEPARATOR;
+
+foreach ($argv as $file) {
+    copy("$vendorDir$file", "$xsdDir$file");
+}
