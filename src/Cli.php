@@ -3,16 +3,18 @@
 namespace alcamo\pwa;
 
 use alcamo\cli\AbstractCli;
+use alcamo\uri\FileUriFactory;
+use alcamo\xml_conf\Loader;
 use GetOpt\{GetOpt, Operand};
 
 class Cli extends AbstractCli
 {
     public const OPTIONS =
         [
-            'json-config-file' => [
-                'j',
+            'config-file' => [
+                'c',
                 GetOpt::REQUIRED_ARGUMENT,
-                'Read conf from this JSON file.',
+                'Read conf from this config file.',
                 'filename'
             ]
         ]
@@ -110,6 +112,18 @@ class Cli extends AbstractCli
         ]
     ];
 
+    public const CONF_FILENAME = 'pwa-conf.xml';
+
+    protected const EXAMPLE_CONF_PATHNAME =
+        __DIR__ . DIRECTORY_SEPARATOR . '..'
+        . DIRECTORY_SEPARATOR . 'etc'
+        . DIRECTORY_SEPARATOR . 'example-conf.xml';
+
+    protected const XSD_PATHNAME =
+        __DIR__ . DIRECTORY_SEPARATOR . '..'
+        . DIRECTORY_SEPARATOR . 'xsd'
+        . DIRECTORY_SEPARATOR . 'pwa-conf.xsd';
+
     public const ACCOUNT_LIST_FMT = "%-37s  %-19s  %-19s\n";
 
     public const INST_LIST_FMT = "%-24s  %-6s %-23s  %-8s  %-10s\n";
@@ -142,18 +156,6 @@ class Cli extends AbstractCli
     protected $accountMgr_;
     protected $mailer_;
 
-    /**
-     * @param $conf array|object Properties containing
-     * - `db`
-     * - `smtp`
-     */
-    public function __construct(object $conf)
-    {
-        parent::__construct();
-
-        $this->conf_ = $conf;
-    }
-
     public function getConf(): object
     {
         return $this->conf_;
@@ -169,17 +171,34 @@ class Cli extends AbstractCli
         return $this->mailer_;
     }
 
+    public function process($arguments = null)
+    {
+        parent::process($arguments);
+
+        if ($this->getOption('config-file')) {
+            $this->conf_ = ConfDocument::newFromUri(
+                (new FileUriFactory())->create($this->getOption('config-file'))
+            );
+        } else {
+            $this->conf_ = Loader::newFromDocumentClass(ConfDocument::class)
+                ->createFromXmlPathnameIfNotExistsAndLoad(
+                    static::CONF_FILENAME,
+                    static::EXAMPLE_CONF_PATHNAME,
+                    static::XSD_PATHNAME,
+                    $pathname
+                );
+
+            if (isset($pathname)) {
+                $this->getLogger()->notice("Created $pathname");
+            }
+        }
+    }
+
     public function innerRun(): int
     {
         if (!$this->getCommand()) {
             $this->showHelp();
             return 0;
-        }
-
-        if ($this->getOption('json-config-file')) {
-            $this->conf_ = json_decode(
-                file_get_contents($this->getOption('json-config-file'))
-            );
         }
 
         /* For testing purposes, innerRun may be called multiple times. */

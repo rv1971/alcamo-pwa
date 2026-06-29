@@ -37,16 +37,14 @@ class AccountMgr
             new OpenInstAccessor(
                 $dbAccessor,
                 $passwdTransformer,
-                new Duration($conf->maxOpenInstAge)
+                $conf->maxOpenInstAge
             ),
             new InstAccessor(
                 $dbAccessor,
                 $passwdTransformer,
-                isset($conf->minReplaceableInstAge)
-                    ? new Duration($conf->minReplaceableInstAge)
-                    : null
+                $conf->minReplaceableInstAge ?? null
             ),
-            new Duration($conf->maxPrevInstAge)
+            $conf->maxPrevInstAge
         );
     }
 

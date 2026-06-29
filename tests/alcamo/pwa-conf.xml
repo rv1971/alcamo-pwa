@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<conf
+    xmlns="https://github.com/rv1971/alcamo-pwa/conf/"
+    xmlns:dc="http://purl.org/dc/terms/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://github.com/rv1971/alcamo-pwa/conf/ ../../xsd/pwa-conf.xsd"
+    dc:created="2026-06-29"
+    passwdKey="HY2la0fIOaaYZxGsuY14IA"
+    maxOpenInstAge="PT4S"
+    maxPrevInstAge="PT5S"
+    url="https://localhost/myapp">
+  <db dsn="sqlite::memory:"/>
+  <smtp
+      host="smtp.example.info"
+      port="587"
+      encryption="tls"
+      username="bob"
+      passwd="passw$1234"
+      from="bob@example.info"/>
+</conf>

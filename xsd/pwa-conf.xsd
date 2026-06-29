@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema
+    xmlns="https://github.com/rv1971/alcamo-pwa/conf/"
+    xmlns:dc="http://purl.org/dc/terms/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:c="https://github.com/rv1971/alcamo-pwa/conf/"
+    targetNamespace="https://github.com/rv1971/alcamo-pwa/conf/"
+    elementFormDefault="qualified"
+    dc:title="PWA configuration"
+    dc:creator="rv1971 &lt;rv1971@web.de&gt;"
+    dc:created="2026-06-29"
+    dc:modified="2026-06-29"
+    xml:lang="en">
+  <xsd:import
+      namespace="http://purl.org/dc/terms/"
+      schemaLocation="../vendor/alcamo/dom/xsd/dc.xsd"/>
+
+  <xsd:annotation>
+    <xsd:documentation xmlns="http://www.w3.org/1999/xhtml">
+      <h2>Simple types</h2>
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:simpleType name="Dsn" id="Dsn">
+    <xsd:union memberTypes="xsd:anyURI xsd:NCName">
+      <xsd:simpleType>
+        <xsd:restriction base="xsd:token">
+          <xsd:pattern value="[a-z]+:.*"/>
+        </xsd:restriction>
+      </xsd:simpleType>
+    </xsd:union>
+  </xsd:simpleType>
+
+  <xsd:annotation>
+    <xsd:documentation xmlns="http://www.w3.org/1999/xhtml">
+      <h2>Complex types</h2>
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:complexType name="Db">
+    <xsd:attribute name="dsn" type="Dsn" use="required"/>
+    <xsd:attribute name="username" type="xsd:string"/>
+    <xsd:attribute name="password" type="xsd:string"/>
+    <xsd:attribute name="namePrefix" type="xsd:NCName"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="Smtp">
+    <xsd:attribute name="host" type="xsd:token" use="required"/>
+    <xsd:attribute name="port" type="xsd:unsignedShort" use="required"/>
+    <xsd:attribute name="encryption" type="xsd:NCName" use="required"/>
+    <xsd:attribute name="username" type="xsd:token" use="required"/>
+    <xsd:attribute name="passwd" type="xsd:string" use="required"/>
+    <xsd:attribute name="from" type="xsd:string" use="required"/>
+  </xsd:complexType>
+
+  <xsd:annotation>
+    <xsd:documentation xmlns="http://www.w3.org/1999/xhtml">
+      <h2>Document element</h2>
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:complexType name="Conf">
+    <xsd:sequence>
+      <xsd:element name="db" type="Db"/>
+      <xsd:element name="smtp" type="Smtp"/>
+    </xsd:sequence>
+
+    <xsd:attribute ref="dc:created" use="required"/>
+    <xsd:attribute ref="dc:modified"/>
+
+    <xsd:attribute name="passwdKey" type="xsd:string" use="required"/>
+    <xsd:attribute name="maxOpenInstAge" type="xsd:duration" use="required"/>
+    <xsd:attribute name="maxPrevInstAge" type="xsd:duration" use="required"/>
+    <xsd:attribute name="minReplaceableInstAge" type="xsd:duration"/>
+    <xsd:attribute name="url" type="xsd:anyURI" use="required"/>
+  </xsd:complexType>
+
+  <xsd:element name="conf" type="Conf"/>
+</xsd:schema>

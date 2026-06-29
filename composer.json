@@ -8,6 +8,7 @@
         "alcamo/cli": "^0.6",
         "alcamo/dao": "^0.6",
         "alcamo/time": "^0.2",
+        "alcamo/xml-conf": "^0.1",
         "composer-runtime-api": "^2.2",
         "phpmailer/phpmailer": "^6.6"
     },

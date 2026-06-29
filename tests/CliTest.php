@@ -3,8 +3,10 @@
 namespace alcamo\pwa;
 
 use alcamo\dao\DbAccessor;
+use alcamo\xml_conf\Loader;
 use PHPUnit\Framework\TestCase;
 
+/* This also tests ConfDocument. */
 class CliTest extends TestCase
 {
     public const DSN = 'sqlite::memory:';
@@ -13,28 +15,14 @@ class CliTest extends TestCase
 
     public function setUp(): void
     {
-        $this->cli_ = new Cli(
-            (object)[
-                'db' => (object)[
-                    'dsn' => static::DSN
-                ],
-                'passwdKey' => random_bytes(8),
-                'maxOpenInstAge' => 'PT4S',
-                'maxPrevInstAge' => 'PT5S',
-                'url' => 'https://localhost/myapp',
-                'smtp' => (object)[
-                    'host' => 'smtp.example.info',
-                    'port' => 587,
-                    'encryption' => 'tls',
-                    'username' => 'bob',
-                    'passwd' => 'passw$1234',
-                    'from' => 'bob@example.info'
-                ]
-            ]
-        );
+        $configHome = __DIR__;
+
+        putenv("XDG_CONFIG_HOME=$configHome");
+
+        $this->cli_ = new Cli();
     }
 
-    public function testOptionJsonConfigFile(): void
+    public function testOptionConfigFile(): void
     {
         $this->cli_->run('');
 
@@ -48,11 +36,11 @@ class CliTest extends TestCase
             $this->cli_->getConf()->smtp->from
         );
 
-        $cli2 = new Cli($this->cli_->getConf());
+        $cli2 = new Cli();
 
         $cli2->run(
-            '-j ' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'etc'
-            . DIRECTORY_SEPARATOR . 'config_example.json'
+            '-c ' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'etc'
+            . DIRECTORY_SEPARATOR . 'example-conf.xml'
             . ' test-database'
         );
 

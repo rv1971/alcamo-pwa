@@ -3,6 +3,7 @@
 namespace alcamo\pwa;
 
 use alcamo\exception\DataNotFound;
+use alcamo\time\Duration;
 use PHPUnit\Framework\TestCase;
 use Symfony\Polyfill\Uuid\Uuid;
 
@@ -44,8 +45,8 @@ class AccountMgrTest extends TestCase
             [
                 'db' => [ 'dsn' => static::DSN ],
                 'passwdKey' => random_bytes(8),
-                'maxOpenInstAge' => 'PT4S',
-                'maxPrevInstAge' => 'PT2S'
+                'maxOpenInstAge' => new Duration('PT4S'),
+                'maxPrevInstAge' => new Duration('PT2S')
             ]
         );
 
