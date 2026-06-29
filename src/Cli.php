@@ -12,7 +12,7 @@ class Cli extends AbstractCli
     public const OPTIONS =
         [
             'config-file' => [
-                'c',
+                null,
                 GetOpt::REQUIRED_ARGUMENT,
                 'Read conf from this config file.',
                 'filename'
