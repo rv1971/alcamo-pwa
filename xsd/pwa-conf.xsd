@@ -14,7 +14,7 @@
     xml:lang="en">
   <xsd:import
       namespace="http://purl.org/dc/terms/"
-      schemaLocation="../vendor/alcamo/dom/xsd/dc.xsd"/>
+      schemaLocation="dc.xsd"/>
 
   <xsd:annotation>
     <xsd:documentation xmlns="http://www.w3.org/1999/xhtml">

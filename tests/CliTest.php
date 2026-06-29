@@ -38,7 +38,7 @@ class CliTest extends TestCase
         $cli2 = new Cli();
 
         $cli2->run(
-            '-c ' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'etc'
+            '--config-file ' . dirname(__DIR__) . DIRECTORY_SEPARATOR . 'etc'
             . DIRECTORY_SEPARATOR . 'example-conf.xml'
             . ' test-database'
         );
